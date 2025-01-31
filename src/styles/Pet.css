@@ -1,0 +1,1916 @@
+/* 修改全局背景样式 */
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: #000;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* 添加像素风格背景网格 */
+body::before,
+body::after,
+.pixel-dots {
+  display: none;
+}
+
+/* 移除之前的浮动点效果 */
+.pixel-dots {
+  display: none;
+}
+
+/* 修改主容器样式 */
+.pet-container {
+  position: relative;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.8);
+  width: 100%;
+  max-width: 1000px;
+  min-height: 700px;
+  margin: 2rem auto;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 移除之前的装饰效果 */
+.pet-container::before,
+.pet-container::after {
+  display: none;
+}
+
+/* 扫描线动画 */
+@keyframes scanline {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 100%;
+  }
+}
+
+/* 添加装饰性像素元素 */
+.pixel-decoration {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  background: rgba(0, 255, 0, 0.03);
+  box-shadow: 0 0 2px rgba(0, 255, 0, 0.02);
+  animation: pixelFloat 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* 添加动画关键帧 */
+@keyframes gridMove {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(20px);
+  }
+}
+
+@keyframes scanlines {
+  0% {
+    background-position: 200% 0, -200% 0;
+  }
+  100% {
+    background-position: -200% 0, 200% 0;
+  }
+}
+
+@keyframes pixelFloat {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.02;
+  }
+  50% {
+    transform: translateY(-15px) translateX(5px) scale(1.2);
+    opacity: 0.03;
+  }
+}
+
+/* 添加浮动像素点 */
+.pixel-dots {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pixel-dot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  background: rgba(0, 255, 0, 0.03);
+  pointer-events: none;
+  animation: pixelFloat var(--float-duration, 4s) ease-in-out infinite;
+  animation-delay: var(--float-delay, 0s);
+  filter: blur(0.5px);
+}
+
+/* 状态条容器样式 */
+.status-container {
+  position: fixed;
+  top: 30px;
+  left: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  z-index: 100;
+  padding: 15px;
+}
+
+/* 状态图标基础样式 */
+.status-icon {
+  width: 48px;
+  height: 48px;
+  position: absolute;
+  left: -45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', cursive;
+  image-rendering: pixelated;
+}
+
+/* Health 图标样式 */
+.health-icon::before {
+  content: '♥';
+  font-size: 42px;
+  color: rgb(255, 0, 0);
+  transform: scale(1.2) translateY(-4px);
+  display: block;
+}
+
+/* Happiness 图标样式 */
+.happiness-icon::before {
+  content: '=)';
+  font-size: 28px;
+  color: rgb(0, 255, 0);
+  text-shadow: 
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000;
+  letter-spacing: -2px;
+}
+
+/* 状态条样式 */
+.status-bar {
+  position: relative;
+  height: 36px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid rgba(0, 255, 0, 0.2);
+  display: flex;
+  align-items: center;
+  padding: 3px;
+  margin-left: 40px;
+  border-radius: 18px;
+}
+
+/* Health 状态条 */
+.health-bar {
+  width: 300px;
+  border-color: rgba(255, 0, 0, 0.2);
+}
+
+/* Happiness 状态条 */
+.happiness-bar {
+  width: 300px;
+  border-color: rgba(0, 255, 0, 0.2);
+}
+
+/* 进度条容器 */
+.progress-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  border-radius: 15px;
+}
+
+/* 进度条基础样式 */
+.progress {
+  height: 100%;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  border-radius: 15px;
+}
+
+/* Health 进度条 */
+.health-progress {
+  background: rgba(255, 0, 0, 0.7);
+}
+
+/* Happiness 进度条 */
+.happiness-progress {
+  background: rgba(0, 255, 0, 0.7);
+}
+
+/* 进度条文字样式 */
+.progress-text {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.8);
+  font-family: 'Press Start 2P', cursive;
+  font-size: 16px;
+  z-index: 2;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Health 进度条文字样式 */
+.health-bar .progress-text {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* Happiness 进度条文字样式 */
+.happiness-bar .progress-text {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* 低状态警告效果 */
+.warning .progress {
+  animation: warningPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes warningPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.status-indicator {
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.progress-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.1) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.1) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 8px 8px;
+  pointer-events: none;
+}
+
+.progress-bar.hunger {
+  background: linear-gradient(to right, #ffd700, #ffeb3b);
+}
+
+.progress-bar.warning {
+  animation: warningPulse 1s infinite;
+}
+
+.status-icon {
+  width: 24px;
+  height: 24px;
+  image-rendering: pixelated;
+  margin-right: 0.5rem;
+}
+
+.status-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.3rem;
+}
+
+.status-indicator {
+  border: 4px solid #000;
+  box-shadow: inset -4px -4px 0 0 #1a1a1a, inset 4px 4px 0 0 #444;
+  padding: 1rem;
+}
+
+.pet-display {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  border: none;
+  width: 100%;
+  height: 400px;
+  position: relative;
+  background: #1a1a1a;
+  margin: 3rem 0 3rem 0;
+  margin-top: 32px;
+  image-rendering: pixelated;
+  overflow: visible;
+  border: 2px solid #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 0 2px #fff,
+    0 0 0 4px #000, 0 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+.pet-display::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(transparent 50%, rgba(0, 255, 255, 0.05) 50%);
+  background-size: 100% 4px;
+  animation: scanline 6s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pet-display::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+        90deg,
+        rgba(0, 255, 255, 0.03) 1px,
+        transparent 1px
+      )
+      0 0 / 20px 20px,
+    linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px) 0 0 / 20px
+      20px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pet-sprite {
+  font-size: 4rem;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5), 
+               0 0 20px rgba(0, 255, 255, 0.3),
+               2px 2px 0 #000, 
+               -2px -2px 0 #000, 
+               2px -2px 0 #000, 
+               -2px 2px 0 #000;
+  white-space: nowrap;
+  line-height: 1;
+  font-family: monospace;
+  z-index: 2;
+  animation: petFloat 3s ease-in-out infinite;
+  position: relative;
+}
+
+/* 修改浮动动画 */
+@keyframes petFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(3deg);
+  }
+}
+
+/* 添加呼吸效果 */
+.pet-sprite::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  animation: shadowPulse 3s ease-in-out infinite;
+}
+
+@keyframes shadowPulse {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateX(-50%) scale(0.8);
+    opacity: 0.1;
+  }
+}
+
+/* 添加心情不好时的动画 */
+.pet-sprite.sad {
+  animation: sadFloat 4s ease-in-out infinite;
+}
+
+@keyframes sadFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(10px) rotate(-3deg);
+  }
+}
+
+/* 修改开心时的动画 */
+.pet-sprite.happy {
+  animation: happyFloat 6s ease-in-out infinite;
+}
+
+@keyframes happyFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translateY(-20px) rotate(-5deg) scale(1.1);
+  }
+  50% {
+    transform: translateY(-10px) rotate(5deg) scale(1.05);
+  }
+  75% {
+    transform: translateY(-15px) rotate(-3deg) scale(1.08);
+  }
+}
+
+/* 添加生病时的动画 */
+.pet-sprite.sick {
+  animation: sickFloat 3s ease-in-out infinite;
+}
+
+@keyframes sickFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(0.95);
+  }
+  25% {
+    transform: translateY(5px) rotate(-2deg) scale(0.98);
+  }
+  75% {
+    transform: translateY(-5px) rotate(2deg) scale(0.92);
+  }
+}
+
+@keyframes glitch {
+  0% {
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5),
+      0 0 20px rgba(0, 255, 255, 0.3), 2px 2px 0 #000;
+    transform: translate(-50%, -50%) skew(0deg);
+  }
+  20% {
+    text-shadow: -2px 0 #ff00ff, 2px 0 #00ffff, 0 0 20px rgba(0, 255, 255, 0.3);
+    transform: translate(-50%, -50%) skew(2deg);
+  }
+  21% {
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5),
+      0 0 20px rgba(0, 255, 255, 0.3), 2px 2px 0 #000;
+    transform: translate(-50%, -50%) skew(0deg);
+  }
+  100% {
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5),
+      0 0 20px rgba(0, 255, 255, 0.3), 2px 2px 0 #000;
+    transform: translate(-50%, -50%) skew(0deg);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translate(-50%, -50%);
+    animation-timing-function: cubic-bezier(0.8, 0, 0.2, 1);
+  }
+  50% {
+    transform: translate(-50%, calc(-50% - 15px));
+    animation-timing-function: cubic-bezier(0.8, 0, 0.2, 1);
+  }
+}
+
+.pet-display .pixel-decoration {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #00ffff;
+  opacity: 0.5;
+  z-index: 1;
+}
+
+.pet-display .pixel-decoration:nth-child(1) {
+  top: 20%;
+  left: 20%;
+  animation: pixelFloat 4s ease-in-out infinite;
+}
+
+.pet-display .pixel-decoration:nth-child(2) {
+  top: 30%;
+  right: 20%;
+  animation: pixelFloat 3s ease-in-out infinite 1s;
+}
+
+.pet-display .pixel-decoration:nth-child(3) {
+  bottom: 20%;
+  left: 30%;
+  animation: pixelFloat 5s ease-in-out infinite 0.5s;
+}
+
+/* .pet-sprite:hover {
+  animation: glitch 1s steps(1) infinite;
+} */
+
+.window-toolbar {
+  background: transparent;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #00ff66;
+  cursor: move;
+}
+
+.window-title {
+  color: #00ff66;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  text-shadow: 0 0 5px rgba(0, 255, 102, 0.5);
+}
+
+.toolbar-button {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.6rem;
+  color: #fff;
+  padding: 2px 8px;
+  margin-right: 8px;
+  background: #1a1a1a;
+  border: 1px solid #fff;
+  box-shadow: inset -1px -1px 0 0 rgba(0, 0, 0, 0.3),
+    inset 1px 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+.dialogue-bubble {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 0;
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  transform: translate(-50%, -50%);
+  max-width: 80%;
+  width: 80%;
+  box-shadow: 0 0 0 4px #000, 0 0 0 8px #fff, 0 0 0 12px #000;
+  display: none;
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.dialogue-bubble.active {
+  display: block;
+  opacity: 1;
+}
+
+.dialogue-bubble::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 10px solid transparent;
+  border-bottom-color: #000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.dialogue-bubble.active::before {
+  opacity: 1;
+}
+
+.dialogue-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 1rem;
+  width: 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.dialogue-options.active {
+  opacity: 1;
+}
+
+.option-button {
+  padding: 0.5rem 1rem;
+  background: #4a90e2;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.7rem;
+  transition: all 0.2s ease;
+}
+
+.option-button:hover {
+  background: #357abd;
+  transform: translateY(-2px);
+}
+
+/* 控制按钮容器 */
+.control-buttons {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+/* 基础按钮样式 - 纯文字设计 */
+.control-button {
+  background: #1a1a1a;
+  padding: 0.8rem 1.5rem;
+  min-width: 120px;
+  border: 2px solid #ffffff;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.75rem;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.feed-button {
+  background: linear-gradient(to bottom, #00a8ff, #0097e6);
+  border-color: #00a8ff;
+}
+
+.talk-button {
+  background: linear-gradient(to bottom, #9c88ff, #8c7ae6);
+  border-color: #9c88ff;
+}
+
+.hint-button {
+  background: linear-gradient(to bottom, #cc33ff, #9933cc);
+  border-color: #cc33ff;
+}
+
+.control-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.control-button:active {
+  transform: scale(0.95);
+}
+
+/* 按钮悬停效果 */
+.control-button:hover {
+  background: #2a2a2a;
+}
+
+/* 按钮激活效果 */
+.control-button:active {
+  box-shadow: inset 2px 2px 0 0 #000, inset -2px -2px 0 0 #444;
+  transform: translateY(1px);
+}
+
+/* 为不同按钮设置颜色区分 */
+.feed-button {
+  border-color: rgba(0, 255, 255, 0.8);
+}
+
+.talk-button {
+  border-color: rgba(255, 0, 255, 0.8);
+}
+
+.hint-button {
+  border-color: rgba(255, 255, 0, 0.8);
+}
+
+.captured-image {
+  width: 200px;
+  height: 150px;
+  border: 4px solid #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.captured-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pet-dialogue-bubble {
+  background: #1a1a1a;
+  padding: 1.5rem;
+  position: fixed;
+  width: 500px;
+  max-width: 90vw;
+  z-index: 1000;
+  border: 2px solid #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 0 2px #fff,
+    0 0 0 4px #000, 0 0 0 5px rgba(255, 255, 255, 0.3);
+  cursor: move;
+  user-select: none;
+  touch-action: none;
+  transform: translate(0, 0);
+  will-change: transform;
+  transition: none;
+}
+
+.pixel-border {
+  border: 0;
+  box-shadow: 0 0 0 4px #000, 0 0 0 8px #fff, 0 0 0 12px #000;
+  position: relative;
+}
+
+.typing-text {
+  min-height: 1.5em;
+  margin: 0;
+  padding: 0;
+  color: #000;
+  display: block;
+  opacity: 1;
+  font-family: 'Press Start 2P', cursive;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  text-align: center;
+  background: transparent;
+}
+
+.typing-text.active {
+  opacity: 1;
+}
+
+.cursor {
+  display: inline-block;
+  width: 8px;
+  animation: blink 1s infinite;
+  color: #000;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.response-button {
+  padding: 1rem 1.5rem;
+  background: #2c2c2c;
+  color: white;
+  border: 4px solid #000;
+  box-shadow: inset -4px -4px 0 0 #1a1a1a, inset 4px 4px 0 0 #444;
+  cursor: pointer;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.9rem;
+  position: relative;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+  margin: 0.5rem 0;
+  display: block;
+}
+
+.response-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.response-button::before {
+  content: '►';
+  position: absolute;
+  left: 0.5rem;
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.response-button:hover::before {
+  opacity: 1;
+  left: 1rem;
+}
+
+.response-button:hover {
+  padding-left: 2.5rem;
+  background: #357abd;
+}
+
+.camera-section {
+  width: 100%;
+  max-width: 700px;
+  margin: 3rem auto;
+  position: relative;
+}
+
+.camera-container {
+  width: 100%;
+  aspect-ratio: 16/9;
+  position: relative;
+  background: #1a1a1a;
+  margin-top: 32px;
+  image-rendering: pixelated;
+  overflow: visible;
+  border: 2px solid #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 0 2px #fff,
+    0 0 0 4px #000, 0 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+/* 添加窗口工具栏 */
+.camera-toolbar {
+  position: absolute;
+  top: -32px;
+  left: -2px;
+  right: -2px;
+  height: 32px;
+  background: #2c2c2c;
+  border: 2px solid #fff;
+  border-bottom: none;
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #000, 0 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+.camera-toolbar-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.6rem;
+  color: #fff;
+  padding: 2px 8px;
+  margin-right: 8px;
+  background: #1a1a1a;
+  border: 1px solid #fff;
+  box-shadow: inset -1px -1px 0 0 rgba(0, 0, 0, 0.3),
+    inset 1px 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+.camera-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.capture-button {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.8rem 2rem;
+  background: #2c2c2c;
+  color: white;
+  border: 4px solid #000;
+  box-shadow: inset -4px -4px 0 0 #1a1a1a, inset 4px 4px 0 0 #444;
+  cursor: pointer;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.capture-button:hover {
+  transform: translateX(-50%) translateY(-2px);
+  background: #357abd;
+}
+
+/* 修改已拍照片的显示样式 */
+.captured-image {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #1a1a1a;
+  margin-top: 32px;
+  position: relative;
+  border: 2px solid #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 0 2px #fff,
+    0 0 0 4px #000, 0 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+.captured-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.feeding-section {
+  width: 100%;
+  max-width: 400px;
+  margin: 2rem auto;
+  text-align: center;
+}
+
+.feeding-message {
+  margin-top: 1rem;
+  color: #2ecc71;
+  font-size: 0.9rem;
+}
+
+.user-response-section {
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+  bottom: auto;
+  left: auto;
+  transform: none;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.response-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 1rem;
+  background: #1a1a1a;
+  border: 4px solid #000;
+  box-shadow: inset -4px -4px 0 0 #1a1a1a, inset 4px 4px 0 0 #444;
+}
+
+.response-button {
+  padding: 1rem 1rem 1rem 2.5rem;
+  background: #2c2c2c;
+  color: white;
+  border: 2px solid #4a90e2;
+  cursor: pointer;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+  image-rendering: pixelated;
+}
+
+.response-arrow {
+  position: absolute;
+  left: 1rem;
+  opacity: 0;
+  transition: all 0.2s ease;
+  color: #4a90e2;
+}
+
+.response-button:hover {
+  background: #357abd;
+  transform: translateX(10px);
+  border-color: #fff;
+}
+
+.response-button:hover .response-arrow {
+  opacity: 1;
+  left: 0.5rem;
+}
+
+.user-response-section {
+  width: 100%;
+  max-width: 500px;
+  margin: 1rem auto;
+}
+
+.pixel-border {
+  position: relative;
+  border: 4px solid #000;
+  box-shadow: inset -4px -4px 0 0 #1a1a1a, inset 4px 4px 0 0 #fff;
+}
+
+.pixel-border::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  background: transparent;
+  border: 2px solid #000;
+  pointer-events: none;
+}
+
+.typing-text {
+  position: relative;
+  padding: 0.5rem;
+  line-height: 1.5;
+}
+
+.cursor {
+  display: inline-block;
+  width: 0.5rem;
+  height: 1em;
+  background: currentColor;
+  margin-left: 2px;
+  animation: blink 1s infinite;
+  vertical-align: middle;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .response-button {
+    font-size: 0.7rem;
+    padding: 0.8rem 0.8rem 0.8rem 2rem;
+  }
+}
+
+.captured-image-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.captured-image {
+  width: 100%;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  background: #2a2a2a;
+  border: 4px solid #000;
+}
+
+.analysis-result {
+  background: #2a2a2a;
+  padding: 1rem;
+  border: 4px solid #000;
+  min-height: 100px;
+}
+
+.analyzing-status {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+}
+
+.loading-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.2rem;
+  color: #4a9eff;
+}
+
+.dots {
+  animation: dotAnimation 1.5s infinite;
+}
+
+.result-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.result-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.label {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.value {
+  font-size: 1rem;
+  color: #fff;
+}
+
+.value.positive {
+  color: #4caf50;
+}
+
+.value.negative {
+  color: #f44336;
+}
+
+.value.reason {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.error-message {
+  color: #f44336;
+  text-align: center;
+  padding: 1rem;
+}
+
+@keyframes dotAnimation {
+  0%,
+  20% {
+    content: '.';
+  }
+  40%,
+  60% {
+    content: '..';
+  }
+  80%,
+  100% {
+    content: '...';
+  }
+}
+
+/* 添加像素风格边框 */
+.pixel-border {
+  position: relative;
+  border: 4px solid #000;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.pixel-border::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+}
+
+.effects {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.effect {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.effect.positive {
+  background-color: rgba(0, 255, 0, 0.1);
+  color: #2da44e;
+}
+
+.effect.negative {
+  background-color: rgba(255, 0, 0, 0.1);
+  color: #cf222e;
+}
+
+.effect.neutral {
+  background-color: rgba(128, 128, 128, 0.1);
+  color: #666;
+}
+
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 1rem;
+  color: #4a90e2;
+  font-size: 0.8rem;
+}
+
+.loading-dots {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background-color: currentColor;
+  border-radius: 50%;
+  animation: bounce 1.4s infinite ease-in-out;
+}
+
+.dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+.dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+.thinking-emoji {
+  display: inline-block;
+  animation: thinking 2s infinite;
+  font-size: 1.2rem;
+}
+
+@keyframes thinking {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.welcome-message {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 0;
+  position: absolute;
+  left: 50%;
+  top: 20%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 80%;
+  box-shadow: 0 0 0 4px #000, 0 0 0 8px #fff, 0 0 0 12px #000;
+  opacity: 1;
+  display: block;
+  z-index: 100;
+  text-align: center;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1.2rem;
+  color: #000;
+  animation: fadeIn 1s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.button-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.5rem;
+  height: 1.5rem;
+  image-rendering: pixelated;
+  filter: brightness(0) invert(1);
+}
+
+.camera-icon {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 20px;
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  box-shadow: 0 0 0 2px white, 4px -2px 0 2px white;
+}
+
+.camera-icon::before {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid #2ecc71;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px white, inset 0 0 0 2px #2ecc71;
+}
+
+.camera-icon::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 4px;
+  top: -2px;
+  left: 4px;
+  background: white;
+  border-radius: 1px;
+}
+
+.chat-icon {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  filter: brightness(0) invert(1);
+}
+
+.chat-icon::before {
+  content: '💬';
+  position: absolute;
+  font-size: 20px;
+  left: 0;
+  top: -2px;
+  image-rendering: pixelated;
+}
+
+.chat-icon::after {
+  content: '...';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #2ecc71;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+/* FEED按钮 */
+.feed-button {
+  background: linear-gradient(to bottom, #006680, #004d66);
+  border: 4px solid #000;
+  box-shadow: 
+    inset -4px -4px 0 0 #004d66,
+    inset 4px 4px 0 0 #0099b3;
+}
+
+.feed-button:hover {
+  background: linear-gradient(to bottom, #0088a3, #006680);
+  box-shadow: 
+    inset -4px -4px 0 0 #006680,
+    inset 4px 4px 0 0 #00b3d1,
+    0 0 10px rgba(0, 153, 204, 0.5);
+}
+
+/* TALK按钮 */
+.talk-button {
+  background: linear-gradient(to bottom, #660066, #4d004d);
+  border: 4px solid #000;
+  box-shadow: 
+    inset -4px -4px 0 0 #4d004d,
+    inset 4px 4px 0 0 #800080;
+}
+
+.talk-button:hover {
+  background: linear-gradient(to bottom, #800080, #660066);
+  box-shadow: 
+    inset -4px -4px 0 0 #660066,
+    inset 4px 4px 0 0 #990099,
+    0 0 10px rgba(153, 0, 153, 0.5);
+}
+
+/* HINT按钮 */
+.hint-button {
+  background: linear-gradient(to bottom, #cc33ff, #9933cc);
+  border: 4px solid #000;
+  box-shadow: 
+    inset -4px -4px 0 0 #9933cc,
+    inset 4px 4px 0 0 #ff66ff;
+}
+
+.hint-button:hover {
+  background: linear-gradient(to bottom, #ff66ff, #cc33ff);
+  box-shadow: 
+    inset -4px -4px 0 0 #cc33ff,
+    inset 4px 4px 0 0 #ff99ff,
+    0 0 10px rgba(255, 102, 255, 0.5);
+}
+
+/* 按钮图标样式 */
+.camera-icon,
+.chat-icon,
+.hint-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: block;
+  margin-right: 8px;
+  filter: brightness(0) invert(1);
+}
+
+/* 状态条标题样式 */
+.status-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  text-shadow: 2px 2px 0 #000;
+}
+
+/* 添加代码雨容器样式 */
+.matrix-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+  overflow: hidden;
+  z-index: 0;
+  opacity: 0.45;
+}
+
+.matrix-column {
+  float: left;
+  color: #0f0;
+  font-family: monospace;
+  font-size: 1.2em;
+  line-height: 1em;
+}
+
+.matrix-char {
+  float: left;
+  transition: text-shadow 0.2s;
+  font-weight: bold;
+}
+
+.matrix-char.bright {
+  color: #fff;
+  text-shadow: 0 0 8px #0f0, 0 0 4px #fff, 0 0 2px #0f0;
+  opacity: 0.9;
+}
+
+.matrix-char.medium {
+  color: #1f1;
+  text-shadow: 0 0 6px #0f0;
+  opacity: 0.7;
+}
+
+.matrix-char.dim {
+  color: #050;
+  text-shadow: 0 0 1px #0f0;
+  opacity: 0.5;
+}
+
+/* 添加对话框顶部工具栏 */
+.dialogue-toolbar {
+  padding: 0.5rem;
+  background: #2c2c2c;
+  border-bottom: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: move;
+  user-select: none;
+  touch-action: none;
+}
+
+.dialogue-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.6rem;
+  color: #fff;
+  padding: 2px 8px;
+  margin-right: auto;
+  background: #1a1a1a;
+  border: 1px solid #fff;
+  box-shadow: inset -1px -1px 0 0 rgba(0, 0, 0, 0.3),
+    inset 1px 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+.dialogue-close {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  color: #fff;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+.dialogue-close:hover {
+  color: #ff4444;
+}
+
+/* 对话内区域 */
+.dialogue-content {
+  background: #1a1a1a;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 2px solid #444;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.typing-text {
+  color: #fff;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+}
+
+/* 选项区域 */
+.response-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: #2a2a2a;
+  border: 2px solid #444;
+}
+
+.response-button {
+  padding: 0.8rem 1.5rem;
+  background: #2c2c2c;
+  color: #fff;
+  border: 2px solid #444;
+  box-shadow: inset -2px -2px 0 0 #1a1a1a, inset 2px 2px 0 0 #444;
+  cursor: pointer;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.response-button:hover {
+  background: #357abd;
+  padding-left: 2rem;
+  border-color: #4a90e2;
+}
+
+/* 显示对话框时的动画 */
+.pet-dialogue-bubble.active {
+  display: block;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 修改工具栏标题样式 */
+.toolbar-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.6rem;
+  color: #fff;
+  padding: 2px 8px;
+  margin-right: auto;
+  background: #1a1a1a;
+  border: 1px solid #fff;
+  box-shadow: inset -1px -1px 0 0 rgba(0, 0, 0, 0.3),
+    inset 1px 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+/* 移除原来的按钮样式 */
+.toolbar-button {
+  display: none;
+}
+
+/* 摄像头窗口样式 */
+.camera-window,
+.chat-window,
+.hint-window {
+  background: rgba(0, 0, 0, 0.85);
+  border: 2px solid #fff;
+  box-shadow: 
+    0 0 10px rgba(0, 255, 102, 0.3),
+    inset 0 0 15px rgba(255, 255, 255, 0.1);
+  width: 400px;
+  position: fixed;
+  z-index: 1000;
+}
+
+.camera-window {
+  width: 800px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 2px solid #fff;
+  box-shadow: 
+    0 0 10px rgba(0, 255, 102, 0.3),
+    inset 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+.chat-window {
+  width: 400px;
+}
+
+.hint-window {
+  width: 380px;
+}
+
+/* 窗口工具栏样式 */
+.window-toolbar {
+  background: transparent;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #00ff66;
+  cursor: move;
+}
+
+.window-title {
+  color: #00ff66;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  text-shadow: 0 0 5px rgba(0, 255, 102, 0.5);
+}
+
+/* 窗口内容区域样式 */
+.camera-content,
+.chat-content,
+.hint-content {
+  padding: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* 关闭按钮样式 */
+.window-close {
+  background: none;
+  border: none;
+  color: #00ff66;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0 4px;
+}
+
+.window-close:hover {
+  color: #ff0000;
+}
+
+/* 确保视频显示正确 */
+.camera-content video {
+  width: 100%;
+  background: #000;
+}
+
+/* 聊天选项样式 */
+.chat-options {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chat-option {
+  background: rgba(0, 255, 102, 0.1);
+  border: 1px solid #00ff66;
+  color: #00ff66;
+  padding: 10px;
+  cursor: pointer;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+.chat-option:hover {
+  background: rgba(0, 255, 102, 0.2);
+}
+
+/* 宠物显示框样式 */
+.pet-window {
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid #00ff66;
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
+  width: 600px;
+  position: relative;
+  z-index: 100;
+}
+
+.pet-content {
+  padding: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.pet-face {
+  color: #00ff66;
+  font-size: 3rem;
+  text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+  animation: petFloat 6s ease-in-out infinite;
+}
+
+/* 不同状态的动画 */
+.pet-face.happy {
+  animation: happyFloat 6s ease-in-out infinite;
+}
+
+.pet-face.sad {
+  animation: sadFloat 4s ease-in-out infinite;
+}
+
+.pet-face.sick {
+  animation: sickFloat 3s ease-in-out infinite;
+}
+
+/* 声音开关按钮样式 */
+.sound-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 30px;
+  background: #1a1a1a;
+  border: 2px solid #00ff66;
+  border-radius: 15px;
+  cursor: pointer;
+  padding: 2px;
+  transition: all 0.3s ease;
+}
+
+.toggle-slider {
+  width: 24px;
+  height: 24px;
+  background: #00ff66;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.sound-toggle.on .toggle-slider {
+  transform: translateX(30px);
+}
+
+.sound-toggle.off .toggle-slider {
+  transform: translateX(0);
+}
+
+.sound-toggle:hover {
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+}
+
+/* 提示文本样式 */
+.hint-text {
+  color: #00ff66;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+/* 确保窗口内容不会溢出 */
+.camera-window,
+.chat-window,
+.hint-window {
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+.window-content {
+  overflow-y: auto;
+  max-height: calc(90vh - 40px);
+}
+
+/* 添加图像识别结果窗口样式 */
+.analysis-window {
+  background: rgba(0, 0, 0, 0.85);
+  border: 2px solid #fff;
+  box-shadow: 
+    0 0 10px rgba(0, 255, 102, 0.3),
+    inset 0 0 15px rgba(255, 255, 255, 0.1);
+  width: 500px;
+  position: fixed;
+  z-index: 1000;
+}
+
+.analysis-content {
+  padding: 20px;
+  color: #00ff66;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.8rem;
+}
+
+.analysis-image {
+  width: 100%;
+  height: auto;
+  margin-bottom: 20px;
+  border: 1px solid #00ff66;
+}
+
+.analysis-result {
+  padding: 15px;
+  background: rgba(0, 255, 102, 0.1);
+  border: 1px solid #00ff66;
+  margin-top: 15px;
+}
+
+/* 自定义滚动条样式 */
+::-webkit-scrollbar {
+  width: 4px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 0, 0.15);
+  height: 80px;
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 0, 0.25);
+}
+
+/* 添加扫描线效果 */
+::-webkit-scrollbar-thumb::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 50%,
+    rgba(0, 255, 255, 0.1) 50%
+  );
+  background-size: 100% 4px;
+  animation: scanline 10s linear infinite;
+}
+
+/* 修改代码雨效果 */
+.matrix-character {
+  position: absolute;
+  color: rgba(0, 255, 0, 0.85);
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 14px;
+  white-space: nowrap;
+  text-shadow: 
+    0 0 8px rgba(0, 255, 0, 0.7),
+    0 0 12px rgba(0, 255, 0, 0.5);
+  opacity: 0;
+  animation: fall 8s linear infinite;
+  will-change: transform, opacity;
+  filter: contrast(1.1) brightness(1.05);
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(1000px);
+    opacity: 0;
+  }
+}
+
+/* 星空容器 */
+.starfield-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* 星空粒子 */
+.pixel-dot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  background: rgba(0, 255, 0, 0.05);  /* 降低基础亮度到0.05 */
+  pointer-events: none;
+  animation: pixelFloat var(--float-duration, 4s) ease-in-out infinite;
+  animation-delay: var(--float-delay, 0s);
+  filter: blur(0.5px);
+}
+
+@keyframes pixelFloat {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    opacity: var(--base-opacity, 0.1);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.1);
+    opacity: calc(var(--base-opacity, 0.1) * 1.5);
+  }
+}
+
