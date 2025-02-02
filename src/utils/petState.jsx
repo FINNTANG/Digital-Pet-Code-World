@@ -81,4 +81,15 @@ class PetState {
 }
 
 const petState = new PetState();
+
+let petName = '';
+
+export const setPetName = (name) => {
+  petName = name;
+};
+
+export const getPetName = () => {
+  return petName;
+};
+
 export default petState; 

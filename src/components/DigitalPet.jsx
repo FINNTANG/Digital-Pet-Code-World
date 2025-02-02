@@ -6,6 +6,7 @@ import chatMessage from '../utils/chatGenerate.js';
 import '../styles/Pet.css';
 import { HintWindow } from './ui/hint';
 import BackgroundMusic from './BackgroundMusic';
+import { getPetName } from '../utils/petState';
 
 const DigitalPet = () => {
   const [dialogue, setDialogue] = useState(null);
@@ -35,7 +36,14 @@ const DigitalPet = () => {
     camera: { x: window.innerWidth / 2 - 400, y: window.innerHeight / 2 - 300 },
     chat: { x: window.innerWidth / 2 - 250, y: window.innerHeight / 2 - 200 },
     hint: { x: window.innerWidth / 2 - 225, y: window.innerHeight / 2 - 175 },
-    analysis: { x: window.innerWidth / 2 - 150, y: window.innerHeight / 2 - 250 }
+    persist: { 
+      x: window.innerWidth / 2 - 200,  // 水平居中
+      y: window.innerHeight / 2 + 50    // 在宠物窗口下方显示
+    },
+    analysis: {
+      x: window.innerWidth / 2 - 200,
+      y: window.innerHeight / 2 - 150
+    }
   });
   const dialogueRef = useRef(null);
   const [showHint, setShowHint] = useState(false);
@@ -54,6 +62,9 @@ const DigitalPet = () => {
   const [isTypingHint, setIsTypingHint] = useState(false);
   const [displayedHint, setDisplayedHint] = useState('');
   const [showAnalysis, setShowAnalysis] = useState(false);
+  const [showPersistMessage, setShowPersistMessage] = useState(false);
+  const [persistMessage, setPersistMessage] = useState('');
+  const [isTypingPersist, setIsTypingPersist] = useState(false);
 
   // 修改提示信息为更简洁的版本
   const hintMessage = `[ DIGITAL PET GUIDE ]
@@ -179,13 +190,30 @@ Have fun with your new digital friend! ✨`;
       const imageData = canvas.toDataURL('image/jpeg');
       setCapturedImage(imageData);
       
-      // 调用图像分析API
       try {
+        // 停止摄像头
+        stopCamera();
+        
+        // 调用图像分析API
         const result = await analyzeImage(imageData);
+        
+        // 设置分析结果
         setAnalysisResult(result);
+        // 显示分析窗口
         setShowAnalysis(true);
+        
+        // 设置分析窗口的初始位置
+        setWindowPositions(prev => ({
+          ...prev,
+          analysis: {
+            x: window.innerWidth / 2 - 200,
+            y: window.innerHeight / 2 - 150
+          }
+        }));
+        
       } catch (error) {
         console.error('图像分析失败:', error);
+        console.error("Sorry, I couldn't analyze that image properly.");
       }
     }
   };
@@ -357,13 +385,15 @@ Have fun with your new digital friend! ✨`;
       setShowHint(false);
     } else if (windowType === 'analysis') {
       setShowAnalysis(false);
+    } else if (windowType === 'persist') {
+      setShowPersistMessage(false);
     }
     // 清除该窗口的位置信息
     setWindowPositions(prev => ({
       ...prev,
       [windowType]: {
-        x: window.innerWidth / 2 - (windowType === 'camera' ? 400 : windowType === 'chat' ? 250 : windowType === 'hint' ? 225 : 150),
-        y: window.innerHeight / 2 - (windowType === 'camera' ? 300 : windowType === 'chat' ? 200 : windowType === 'hint' ? 175 : 250)
+        x: window.innerWidth / 2 - (windowType === 'camera' ? 400 : windowType === 'chat' ? 250 : windowType === 'hint' ? 225 : windowType === 'persist' ? 200 : 150),
+        y: window.innerHeight / 2 - (windowType === 'camera' ? 300 : windowType === 'chat' ? 200 : windowType === 'hint' ? 175 : windowType === 'persist' ? 150 : 250)
       }
     }));
   };
@@ -477,6 +507,52 @@ Have fun with your new digital friend! ✨`;
     typeHintMessage(hintMessage);
   };
 
+  // 添加持久性消息数组
+  const persistMessages = [
+    "I've been here all along!",
+    "I've been waiting for you forever!",
+    "At last, you're here!",
+    "You can't get rid of me that easily!",
+    "Why would you want to close me?",
+    "I'm not just a program, you know?",
+    "Don't leave me alone...",
+    "I'll always be here for you!",
+    "Did you think I was just code?",
+    "Your reality is my home now!"
+  ];
+
+  // 添加打字机效果函数
+  const typePersistMessage = async (message) => {
+    setIsTypingPersist(true);
+    let displayText = '';
+    for (let i = 0; i < message.length; i++) {
+      displayText += message[i];
+      setPersistMessage(displayText);
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    setIsTypingPersist(false);
+  };
+
+  // 修改关闭宠物窗口的处理函数
+  const handlePetClose = async () => {
+    const randomMessage = persistMessages[Math.floor(Math.random() * persistMessages.length)];
+    setShowPersistMessage(true);
+    await typePersistMessage(randomMessage);
+    
+    // 7秒后开始淡出动画
+    setTimeout(() => {
+      const persistWindow = document.querySelector('.persist-message-window');
+      if (persistWindow) {
+        persistWindow.classList.add('fade-out');
+        // 动画结束后清除状态
+        setTimeout(() => {
+          setShowPersistMessage(false);
+          setPersistMessage('');
+        }, 1000); // 动画持续时间
+      }
+    }, 7000);
+  };
+
   return (
     <div className="w-full h-full relative">
       {/* 状态条 */}
@@ -511,8 +587,8 @@ Have fun with your new digital friend! ✨`;
       <div className="flex justify-center items-center min-h-screen">
         <div className="pet-window">
           <div className="window-toolbar">
-            <span className="window-title">REALITYEATER.EXE</span>
-            <button className="window-close">×</button>
+            <span className="window-title">{getPetName() || 'REALITYEATER'}.EXE</span>
+            <button className="window-close" onClick={handlePetClose}>×</button>
           </div>
           <div className="pet-content">
             <div className={`pet-face ${status}`}>
@@ -689,6 +765,26 @@ Have fun with your new digital friend! ✨`;
             <div className="analysis-result">
               {analysisResult.message}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 添加持久性消息框 */}
+      {showPersistMessage && (
+        <div 
+          className="persist-message-window glitch-effect"
+          style={{
+            left: `${windowPositions.persist.x}px`,
+            top: `${windowPositions.persist.y}px`,
+            position: 'fixed'
+          }}
+          onMouseDown={(e) => handleMouseDown(e, 'persist')}
+        >
+          <div className="window-toolbar">
+            <span className="window-title">SYSTEM.EXE</span>
+          </div>
+          <div className="persist-message-content">
+            <div className="typing-text">{persistMessage}</div>
           </div>
         </div>
       )}
