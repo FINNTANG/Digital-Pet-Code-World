@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { setPetName } from '../utils/petState';
 import { useNavigate } from 'react-router-dom';
+import SoundEffect from './SoundEffect';
 
 // Add Google Font link for VT323
 const FontLoader = () => (
@@ -153,78 +154,104 @@ const TypewriterText = ({ text, onComplete, delay = 100, className = '', showCur
   );
 };
 
-const OpeningSequence = () => {
+const OpeningSequence = ({ onStartGame }) => {
   const navigate = useNavigate();
   const [phase, setPhase] = useState('title');
-  const [showTitle, setShowTitle] = useState(true);
   const [petName, setPetNameState] = useState('');
   const [fadeOutTitle, setFadeOutTitle] = useState(false);
   const [fadeOutPrompt, setFadeOutPrompt] = useState(false);
+  const [showInput, setShowInput] = useState(false);
+  const [showPlay, setShowPlay] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const handleTitleComplete = () => {
-    setFadeOutTitle(true);
-    setTimeout(() => {
-      setShowTitle(false);
-      setPhase('naming');
-      setShowPrompt(true);
-      setPhase('input');
-    }, 2000);
-  };
-
-  const handleSubmit = () => {
-    if (petName.trim()) {
+  const handleNameSubmit = () => {
+    if (petName.trim() && !isTransitioning) {
+      SoundEffect.playClick();
+      setIsTransitioning(true);
       setPetName(petName.trim());
       setFadeOutPrompt(true);
+      
+      setTimeout(() => {
+        setShowPrompt(false);
+        setShowInput(false);
+      }, 1000);
+      
       setTimeout(() => {
         setPhase('play');
-      }, 1000);
+        setShowPlay(true);
+        setIsTransitioning(false);
+      }, 1200);
+    }
+  };
+
+  const handleInitialize = () => {
+    if (!isTransitioning) {
+      setIsTransitioning(true);
+      setFadeOutTitle(true);
+      
+      setTimeout(() => {
+        setPhase('input');
+        setShowInput(true);
+        setShowPrompt(true);
+        setIsTransitioning(false);
+      }, 3000);
+    }
+  };
+
+  const handlePlay = () => {
+    if (petName.trim()) {
+      SoundEffect.playClick();
+      setPetName(petName.trim());
+      onStartGame();
+      navigate('/game');
     }
   };
 
   return (
-    <div className="relative h-screen w-full bg-black overflow-hidden flex items-center justify-center">
+    <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
       <FontLoader />
       <MatrixRain />
       
       <div className="relative z-10 flex flex-col items-center justify-center gap-8 px-4">
-        {showTitle && (
+        {phase === 'title' && (
           <div 
             style={{
               padding: '20px 0',
-              marginTop: '20px'
+              marginTop: '20px',
+              opacity: fadeOutTitle ? 0 : 1,
+              transition: 'opacity 3s ease-in-out'
             }}
           >
             <TypewriterText 
               text="REALITYEATER"
-              onComplete={handleTitleComplete}
+              onComplete={handleInitialize}
               delay={200}
               className="font-bold"
-              fadeOut={fadeOutTitle}
-              style={{
-                fontWeight: 'bold',
-                letterSpacing: '2px'
-              }}
             />
           </div>
         )}
 
-        {showPrompt && (
+        {showPrompt && phase === 'input' && (
           <div className={`text-2xl mt-4 transition-opacity duration-1000 ${fadeOutPrompt ? 'opacity-0' : 'opacity-100'}`}>
             <PixelStyleText style={{
               textShadow: '0 0 2px #00ff00, 0 0 4px #00ff00',
-              fontSize: '24px'
+              fontSize: '32px',
+              letterSpacing: '2px'
             }}>
               Please name your virtual pet...
             </PixelStyleText>
           </div>
         )}
 
-        {phase === 'input' && (
+        {(showInput || fadeOutPrompt) && phase === 'input' && (
           <div 
             className="flex flex-col items-center gap-6 mt-8"
             style={{
-              animation: 'fadeIn 1s ease-out forwards',
+              animation: fadeOutPrompt ? 'fadeOut 1s ease-out forwards' : 'fadeIn 1s ease-out forwards',
+              opacity: fadeOutPrompt ? 0 : 1,
+              transition: 'all 1s ease-in-out',
+              transform: fadeOutPrompt ? 'translateY(20px)' : 'translateY(0)'
             }}
           >
             <input
@@ -239,11 +266,12 @@ const OpeningSequence = () => {
                 textShadow: '0 0 2px #00ff00',
                 fontSize: '24px',
                 letterSpacing: '2px',
-                fontWeight: '700'
+                fontWeight: '700',
+                animation: 'glowPulse 2s infinite'
               }}
             />
             <button
-              onClick={handleSubmit}
+              onClick={handleNameSubmit}
               className="mt-4 px-8 py-3 bg-transparent border-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-black transition-all duration-300"
               style={{
                 fontFamily: "'VT323', monospace",
@@ -251,7 +279,8 @@ const OpeningSequence = () => {
                 textShadow: '0 0 2px #00ff00',
                 fontSize: '24px',
                 letterSpacing: '2px',
-                fontWeight: '700'
+                fontWeight: '700',
+                animation: 'glowPulse 2s infinite'
               }}
             >
               INITIALIZE
@@ -259,19 +288,22 @@ const OpeningSequence = () => {
           </div>
         )}
 
-        {phase === 'play' && (
-          <div style={{
-            animation: 'fadeIn 1.5s ease-out forwards',
-          }}>
+        {phase === 'play' && !isTransitioning && (
+          <div 
+            className="mt-8"
+            style={{
+              animation: 'fadeIn 1s ease-out forwards',
+              opacity: 0,
+              transform: 'translateY(-20px)',
+              transition: 'all 1s ease-in-out'
+            }}
+          >
             <button
-              onClick={() => navigate('/game')}
+              onClick={handlePlay}
               className="text-3xl px-12 py-4 bg-transparent border-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-black transition-all duration-300 transform hover:scale-105"
               style={{
-                fontFamily: "'VT323', monospace",
-                boxShadow: '0 0 15px #00ff00',
-                textShadow: '0 0 8px #00ff00',
-                letterSpacing: '2px',
-                fontWeight: '700'
+                fontFamily: "'Press Start 2P', cursive",
+                boxShadow: '0 0 8px #00ff00'
               }}
             >
               PLAY
@@ -281,10 +313,21 @@ const OpeningSequence = () => {
       </div>
 
       <style jsx global>{`
+        @keyframes fadeOut {
+          from {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          to {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+        }
+
         @keyframes fadeIn {
           from {
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(-20px);
           }
           to {
             opacity: 1;
@@ -371,22 +414,6 @@ const OpeningSequence = () => {
 
         .ease-in-out {
           transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* 优化淡出动画曲线 */
-        @keyframes fadeOut {
-          from {
-            opacity: 1;
-            filter: blur(0);
-            transform: scale(1);
-            text-shadow: 0 0 4px #00ff00, 0 0 8px #00ff00, 0 0 12px #00ff00;
-          }
-          to {
-            opacity: 0;
-            filter: blur(2px);
-            transform: scale(0.98);
-            text-shadow: none;
-          }
         }
       `}</style>
     </div>

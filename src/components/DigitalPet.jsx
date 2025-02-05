@@ -7,6 +7,33 @@ import '../styles/Pet.css';
 import { HintWindow } from './ui/hint';
 import BackgroundMusic from './BackgroundMusic';
 import { getPetName } from '../utils/petState';
+import SoundEffect from './SoundEffect';
+
+// 在文件顶部添加宠物类型常量
+const PET_TYPES = {
+  DOG: 'dog',
+  FOX: 'fox',
+  SNAKE: 'snake'
+};
+
+const PET_WEIGHTS = {
+  [PET_TYPES.DOG]: 0.4,   // 40% 概率
+  [PET_TYPES.FOX]: 0.4,   // 40% 概率
+  [PET_TYPES.SNAKE]: 0.2  // 20% 概率
+};
+
+// 修改随机选择宠物类型的函数，使其更可靠
+const getRandomPetType = () => {
+  const random = Math.random();
+  
+  if (random < 0.4) {
+    return PET_TYPES.DOG;      // 0-0.4 (40%)
+  } else if (random < 0.8) {
+    return PET_TYPES.FOX;      // 0.4-0.8 (40%)
+  } else {
+    return PET_TYPES.SNAKE;    // 0.8-1.0 (20%)
+  }
+};
 
 const DigitalPet = () => {
   const [dialogue, setDialogue] = useState(null);
@@ -65,6 +92,19 @@ const DigitalPet = () => {
   const [showPersistMessage, setShowPersistMessage] = useState(false);
   const [persistMessage, setPersistMessage] = useState('');
   const [isTypingPersist, setIsTypingPersist] = useState(false);
+  const [isApiCalling, setIsApiCalling] = useState(false);
+  const apiTimeoutRef = useRef(null);
+
+  // 修改宠物类型状态的初始化
+  const [petType, setPetType] = useState(() => {
+    // 每次刷新都重新随机选择宠物类型
+    const newPetType = getRandomPetType();
+    
+    // 更新 localStorage（可选）
+    localStorage.setItem('petType', newPetType);
+    
+    return newPetType;
+  });
 
   // 修改提示信息为更简洁的版本
   const hintMessage = `[ DIGITAL PET GUIDE ]
@@ -84,23 +124,25 @@ const DigitalPet = () => {
 
 Have fun with your new digital friend! ✨`;
 
-  // 检查摄像头权限
+  // 修改相机权限的处理
   useEffect(() => {
-    const checkCameraPermission = async () => {
+    // 在组件加载时就请求相机权限
+    const requestCameraPermission = async () => {
       try {
-        const result = await navigator.permissions.query({ name: 'camera' });
-        setCameraPermission(result.state);
-
-        result.addEventListener('change', () => {
-          setCameraPermission(result.state);
-        });
+        await navigator.mediaDevices.getUserMedia({ video: true })
+          .then(stream => {
+            // 立即停止流，我们只是想获取权限
+            stream.getTracks().forEach(track => track.stop());
+            setCameraPermission('granted');
+          });
       } catch (err) {
-        console.log('Permission check not supported');
+        console.error('Camera permission denied:', err);
+        setCameraPermission('denied');
       }
     };
 
-    checkCameraPermission();
-  }, []);
+    requestCameraPermission();
+  }, []); // 只在组件挂载时执行一次
 
   // 清理摄像头资源
   useEffect(() => {
@@ -181,6 +223,14 @@ Have fun with your new digital friend! ✨`;
   };
 
   const captureImage = async () => {
+    // 如果正在进行 API 调用，直接返回
+    if (isApiCalling) {
+      setPersistMessage("Please wait a moment before making another request...");
+      setShowPersistMessage(true);
+      setTimeout(() => setShowPersistMessage(false), 3000);
+      return;
+    }
+
     if (videoRef.current) {
       const canvas = document.createElement('canvas');
       canvas.width = videoRef.current.videoWidth;
@@ -191,29 +241,69 @@ Have fun with your new digital friend! ✨`;
       setCapturedImage(imageData);
       
       try {
-        // 停止摄像头
         stopCamera();
+        setIsAnalyzing(true);
+        setIsApiCalling(true);
         
-        // 调用图像分析API
-        const result = await analyzeImage(imageData);
-        
-        // 设置分析结果
-        setAnalysisResult(result);
-        // 显示分析窗口
+        // 设置 API 超时
+        apiTimeoutRef.current = setTimeout(() => {
+          setIsApiCalling(false);
+          setAnalysisResult({
+            message: '<div class="text-red-500">Request timeout. Please try again.</div>'
+          });
+          setIsAnalyzing(false);
+        }, 20000); // 改为20秒超时
+
+        // 立即显示分析窗口
+        setAnalysisResult({
+          message: '<span class="loading-text">ANALYZING...</span>'
+        });
         setShowAnalysis(true);
         
-        // 设置分析窗口的初始位置
-        setWindowPositions(prev => ({
-          ...prev,
-          analysis: {
-            x: window.innerWidth / 2 - 200,
-            y: window.innerHeight / 2 - 150
-          }
-        }));
+        const result = await analyzeImage(imageData);
+        
+        clearTimeout(apiTimeoutRef.current);
+        
+        if (result.result) {
+          // 更新宠物状态
+          petState.health = Math.min(100, Math.max(0, petState.health + result.healthEffect));
+          petState.happiness = Math.min(100, Math.max(0, petState.happiness + result.moodEffect));
+          setStatus(petState.state);
+          
+          // 构建分析结果消息
+          const analysisText = [
+            `<div class="analysis-line text-white">Content: ${result.name}</div>`, // 将内容设为白色
+            `<div class="analysis-line ${result.isLike ? "text-green-500" : "text-red-500"}">Status: ${result.isLike ? "I like it!" : "I don't like it..."}</div>`,
+            `<div class="analysis-line">Reason: ${result.reason}</div>`,
+            `<div class="analysis-line">Effects:</div>`,
+            `<div class="analysis-line ${result.moodEffect >= 0 ? "text-green-500" : "text-red-500"}">Mood: ${result.moodEffect >= 0 ? '+' : ''}${result.moodEffect}</div>`,
+            `<div class="analysis-line ${result.healthEffect >= 0 ? "text-green-500" : "text-red-500"}">Health: ${result.healthEffect >= 0 ? '+' : ''}${result.healthEffect}</div>`
+          ];
+          
+          // 使用打字机效果显示内容
+          const typeAnalysis = async () => {
+            setAnalysisResult({ message: '' });
+            for (const line of analysisText) {
+              await new Promise(resolve => setTimeout(resolve, 800)); // 增加每行之间的延迟
+              setAnalysisResult(prev => ({
+                message: prev.message + line
+              }));
+            }
+          };
+          
+          // 开始打字效果
+          typeAnalysis();
+        }
         
       } catch (error) {
-        console.error('图像分析失败:', error);
-        console.error("Sorry, I couldn't analyze that image properly.");
+        console.error('Image analysis failed:', error);
+        setAnalysisResult({
+          message: '<div class="text-red-500">Analysis failed. Please try again.</div>'
+        });
+      } finally {
+        setIsAnalyzing(false);
+        setIsApiCalling(false);
+        clearTimeout(apiTimeoutRef.current);
       }
     }
   };
@@ -232,85 +322,158 @@ Have fun with your new digital friend! ✨`;
 
   const handleChat = () => {
     setShowChat(true);
-    const newDialogue = getRandomDialogue(petState.state);
-    setDialogue(newDialogue);
-    typeMessage(newDialogue.message);
+    
+    // 初始对话，不需要API调用
+    const initialDialogue = {
+      message: `*Purrs softly* Hello! My current mood is ${petState.happiness}% and health is ${petState.health}%. How can I help you today?`,
+      options: [
+        "How are you feeling?",
+        "Want to play a game?",
+        "Tell me about yourself"
+      ]
+    };
+    
+    setDialogue(initialDialogue);
+    typeMessage(initialDialogue.message);
   };
 
   const handleResponse = async (option) => {
+    if (isApiCalling) {
+      setPersistMessage("I'm still thinking about your last message...");
+      setShowPersistMessage(true);
+      setTimeout(() => setShowPersistMessage(false), 3000);
+      return;
+    }
+
     setIsWaitingResponse(true);
-    const isSilent = option === '...';
-    petState.interact(isSilent);
+    setDisplayedMessage("");
+    setIsApiCalling(true);
+    
+    // 设置加载动画文本
+    setDisplayedMessage(
+      "Thinking about your message..."
+    );
+    
+    setDialogue({
+      message: "",
+      options: []
+    });
+
     try {
-      const response = await chatMessage(
-        petState.health,
-        petState.happiness,
-        option,
-      );
-
-      await typeMessage(response.message);
-
-      setDialogue({
-        message: response.message,
-        options: [
-          ...response.options,
-          "I'm sorry, I can't keep you company right now",
-        ],
+      const timeoutPromise = new Promise((_, reject) => {
+        apiTimeoutRef.current = setTimeout(() => {
+          reject(new Error('Request timeout'));
+        }, 20000);
       });
 
-      // 添加值的限制
-      petState.health = Math.min(
-        100,
-        Math.max(0, petState.health + response.health),
-      );
-      petState.happiness = Math.min(
-        100,
-        Math.max(0, petState.happiness + response.mood),
-      );
-      setStatus(petState.state);
+      const response = await Promise.race([
+        chatMessage(petState.health, petState.happiness, option),
+        timeoutPromise
+      ]);
+
+      clearTimeout(apiTimeoutRef.current);
+      
+      if (response && response.result) {
+        // 先设置新的选项，确保对话可以继续
+        setDialogue({
+          message: response.message,
+          options: response.options || ["Tell me more", "That's interesting", "How are you feeling?"] // 提供默认选项
+        });
+        
+        // 使用较慢的打字效果
+        const typeMessageOptimized = async (text) => {
+          let index = 0;
+          const length = text.length;
+          
+          const animate = () => {
+            if (index < length) {
+              setDisplayedMessage(text.slice(0, index + 1));
+              index++;
+              // 使用 setTimeout 代替 requestAnimationFrame 来减慢速度
+              setTimeout(animate, 50); // 增加到50ms的延迟
+            }
+          };
+          
+          animate();
+        };
+        
+        await typeMessageOptimized(response.message);
+        
+        // 更新宠物状态
+        petState.health = Math.min(100, Math.max(0, petState.health + response.health));
+        petState.happiness = Math.min(100, Math.max(0, petState.happiness + response.mood));
+        setStatus(petState.state);
+      } else {
+        // 如果API响应没有选项，提供默认选项以继续对话
+        setDialogue({
+          message: "I'm enjoying our chat! What else would you like to talk about?",
+          options: [
+            "Tell me about your day",
+            "What makes you happy?",
+            "Let's talk about something else"
+          ]
+        });
+      }
     } catch (error) {
-      console.error('Conversation generation failed:', error);
-      setDisplayedMessage("Sorry, I'm a bit tired right now...");
+      console.error('Response generation failed:', error);
+      // 即使在错误情况下也提供选项以继续对话
+      setDialogue({
+        message: "Sorry, I got distracted for a moment. What were you saying?",
+        options: [
+          "Let's try again",
+          "No problem, let's chat",
+          "Tell me something fun"
+        ]
+      });
     } finally {
       setIsWaitingResponse(false);
+      setIsApiCalling(false);
+      clearTimeout(apiTimeoutRef.current);
     }
   };
 
-  const getPetSprite = () => {
-    // 根据状态和心情值选择不同表情
-    if (petState.health < 30 || petState.happiness < 30) {
-      return ['(´;ω;`)', '(╥﹏╥)', '(｡•́︿•̀｡)', '(っ˘̩╭╮˘̩)っ'][
-        Math.floor(Math.random() * 4)
-      ];
-    }
+  // 修改获取宠物精灵的函数
+  const getPetSprite = (status) => {
+    const basePath = `/pets/${petType}/`;
+    
+    // 根据宠物类型调整显示大小
+    const getSize = () => {
+      switch (petType) {
+        case PET_TYPES.SNAKE:
+          return '140px';
+        case PET_TYPES.FOX:
+          return '140px';
+        case PET_TYPES.DOG:
+        default:
+          return '140px';
+      }
+    };
 
-    switch (status) {
-      case 'happy':
-        return ['(｡◕‿◕｡)', '(◕‿◕✿)', '(◠‿◠)', '(＾▽＾)', '(◍•ᴗ•◍)'][
-          Math.floor(Math.random() * 5)
-        ];
-      case 'sad':
-        return ['(´･_･`)', '(｡•́︿•̀｡)', '(｡╯︵╰｡)', '(っ- ‸ – ς)'][
-          Math.floor(Math.random() * 4)
-        ];
-      case 'sick':
-        return ['(；一_一)', '(￣ヘ￣)', '(-.-)Zzz...', '(。-ω-)'][
-          Math.floor(Math.random() * 4)
-        ];
-      case 'dead':
-        return ['(×_×)', '(✖╭╮✖)', '(╯︵╰,)', '(︶︹︺)'][
-          Math.floor(Math.random() * 4)
-        ];
-      default:
-        return ['(・∀・)', '(｡♥‿♥｡)', '(◕ᴗ◕✿)', '(◠‿◠✿)', '(◕‿◕)'][
-          Math.floor(Math.random() * 5)
-        ];
-    }
+    // 所有宠物都使用相同的 happy 状态逻辑
+    const getHappySprite = () => {
+      const happyVariants = ['happy', 'happy2', 'happy3'];
+      return `${happyVariants[Math.floor(Math.random() * 3)]}.gif`;
+    };
+
+    // 在渲染部分使用动态尺寸
+    return {
+      src: status === 'happy' 
+        ? `${basePath}${getHappySprite()}`
+        : `${basePath}${status === 'normal' ? 'idle' : status}.gif`,
+      size: getSize()
+    };
+  };
+
+  // 修改宠物窗口标题
+  const getPetTitle = () => {
+    const name = getPetName() || 'REALITYEATER';
+    const type = petType.toUpperCase();
+    return `${name}_${type}.EXE`;
   };
 
   useEffect(() => {
-    setCurrentSprite(getPetSprite());
-  }, [status, petState.health, petState.happiness]);
+    setCurrentSprite(getPetSprite(status));
+  }, [status, petState.health, petState.happiness, petType]);
 
   // 在组件顶部添加装饰点生成函数
   const generatePixelDots = () => {
@@ -376,6 +539,7 @@ Have fun with your new digital friend! ✨`;
 
   // 确保关闭按钮正常工作
   const handleClose = (windowType) => {
+    SoundEffect.playClose();  // 播放关闭音效
     if (windowType === 'camera') {
       stopCamera();
       setShowCamera(false);
@@ -535,6 +699,7 @@ Have fun with your new digital friend! ✨`;
 
   // 修改关闭宠物窗口的处理函数
   const handlePetClose = async () => {
+    SoundEffect.playClose();  // 添加关闭音效
     const randomMessage = persistMessages[Math.floor(Math.random() * persistMessages.length)];
     setShowPersistMessage(true);
     await typePersistMessage(randomMessage);
@@ -552,6 +717,15 @@ Have fun with your new digital friend! ✨`;
       }
     }, 7000);
   };
+
+  // 清理函数
+  useEffect(() => {
+    return () => {
+      if (apiTimeoutRef.current) {
+        clearTimeout(apiTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="w-full h-full relative">
@@ -587,13 +761,27 @@ Have fun with your new digital friend! ✨`;
       <div className="flex justify-center items-center min-h-screen">
         <div className="pet-window">
           <div className="window-toolbar">
-            <span className="window-title">{getPetName() || 'REALITYEATER'}.EXE</span>
-            <button className="window-close" onClick={handlePetClose}>×</button>
+            <span className="window-title">{getPetTitle()}</span>
+            <button 
+              className="window-close" 
+              onClick={handlePetClose}  // 使用修改后的处理函数
+            >
+              ×
+            </button>
           </div>
           <div className="pet-content">
-            <div className={`pet-face ${status}`}>
-              {currentSprite}
-            </div>
+            <div 
+              className="pet-sprite"
+              style={{
+                backgroundImage: `url(${currentSprite.src})`,
+                width: currentSprite.size,
+                height: currentSprite.size,
+                backgroundSize: 'contain',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+                imageRendering: 'pixelated'
+              }}
+            />
           </div>
         </div>
       </div>
@@ -603,7 +791,8 @@ Have fun with your new digital friend! ✨`;
         <button 
           className="control-button feed-button" 
           onClick={() => {
-            if (!showCamera) {  // 添加条件检查
+            SoundEffect.playClick();  // 播放点击音效
+            if (!showCamera) {
               setShowCamera(true);
               startCamera();
             }
@@ -614,7 +803,8 @@ Have fun with your new digital friend! ✨`;
         <button 
           className="control-button talk-button" 
           onClick={() => {
-            if (!showChat) {  // 添加条件检查
+            SoundEffect.playClick();  // 播放点击音效
+            if (!showChat) {
               handleChat();
             }
           }}
@@ -624,7 +814,8 @@ Have fun with your new digital friend! ✨`;
         <button 
           className="control-button hint-button" 
           onClick={() => {
-            if (!showHint) {  // 添加条件检查
+            SoundEffect.playClick();  // 播放点击音效
+            if (!showHint) {
               handleShowHint();
             }
           }}
@@ -666,9 +857,14 @@ Have fun with your new digital friend! ✨`;
           </div>
           <div className="camera-content">
             <video ref={videoRef} autoPlay playsInline />
-            <button className="take-photo-btn" onClick={captureImage}>
-              Take Photo
-            </button>
+            <div className="camera-controls">
+              <button 
+                className="pixel-button camera-capture-btn"
+                onClick={captureImage}
+              >
+                Take Photo
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -695,8 +891,21 @@ Have fun with your new digital friend! ✨`;
             >×</button>
           </div>
           <div className="chat-content">
-            <div className="chat-message">{displayedMessage}</div>
-            {dialogue && dialogue.options && (
+            <div className="chat-message">
+              {isWaitingResponse ? (
+                <div className="chat-loading">
+                  <div className="thinking-text">{displayedMessage}</div>
+                  <div className="loading-dots">
+                    <div className="loading-dot"></div>
+                    <div className="loading-dot"></div>
+                    <div className="loading-dot"></div>
+                  </div>
+                </div>
+              ) : (
+                displayedMessage
+              )}
+            </div>
+            {dialogue && dialogue.options && !isWaitingResponse && (
               <div className="chat-options">
                 {dialogue.options.map((option, index) => (
                   <button 
@@ -762,9 +971,10 @@ Have fun with your new digital friend! ✨`;
           </div>
           <div className="analysis-content">
             <img src={capturedImage} alt="Captured" className="analysis-image" />
-            <div className="analysis-result">
-              {analysisResult.message}
-            </div>
+            <div 
+              className="analysis-result"
+              dangerouslySetInnerHTML={{ __html: analysisResult.message }}
+            />
           </div>
         </div>
       )}

@@ -10,15 +10,13 @@ async function analyzeImage(base64Image) {
         body: JSON.stringify({
           model: 'gpt-4-turbo-preview',
           max_tokens: 1000,
-          // response_format: { type: 'json_object' },
           messages: [
             {
               role: 'user',
               content: [
                 {
                   type: 'text',
-                  text: 'Got it! Please provide the image, and I will eturn the required fields in JSON format based on the information you need，Translate into English and respond entirely in English：1.The content of the image 2.Whether the pet likes it 3.The specific reason for liking or not liking it 4.The impact of this item on the pet mood (positive or negative number)5.The impact of this item on the pet health (positive or negative number)。The specific format is as follows：{result: true,  name: The content of the recognized image,  isLike: Whether it is liked,  reason: The reason for liking or disliking,  moodEffect: Happiness impact.,  healthEffect: Health impact }',
-                  // text: 'I will provide you with an image, and you should pretend to be an electronic pet. You need to tell me what it is, whether you like it or not, and if you like it, explain why. If you don't like it, also explain why, and respond entirely in English.The required response format is as follows：{name: The content of the recognized image, like: Whether I like it, reason: The reason for liking or disliking,}',
+                  text: 'Got it! Please provide the image, and I will return the required fields in JSON format based on the information you need. Translate into English and respond entirely in English：1.The content of the image 2.Whether the pet likes it 3.The specific reason for liking or not liking it (keep reason within 10 words) 4.The impact of this item on the pet mood (positive or negative number) 5.The impact of this item on the pet health (positive or negative number). The specific format is as follows：{result: true, name: The content of the recognized image, isLike: Whether it is liked, reason: The reason for liking or disliking (brief), moodEffect: Happiness impact, healthEffect: Health impact}'
                 },
                 {
                   type: 'image_url',
