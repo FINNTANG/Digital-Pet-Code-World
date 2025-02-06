@@ -1,17 +1,65 @@
-## Running React on Replit
+# REALITYEATER - Interactive Digital Pet  
 
-[React](https://reactjs.org/) is a popular JavaScript library for building user interfaces.
+REALITYEATER is a web-based interactive virtual pet game that blends retro pixel art with modern UI design. Players can interact with three different virtual pets (dog, fox, snake) and take care of them by feeding them through a webcam and engaging in conversations.  
 
-[Vite](https://vitejs.dev/) is a blazing fast frontend build tool that includes features like Hot Module Reloading (HMR), optimized builds, and TypeScript support out of the box.
+![屏幕截图 2025-02-06 094233](https://github.com/user-attachments/assets/a80a707a-7f5e-458c-bb4c-ee509888401d)
 
-Using the two in conjunction is one of the fastest ways to build a web app.
+## 🌟 Features  
 
-### Getting Started
-- Hit run
-- Edit [App.jsx](#src/App.jsx) and watch it live update!
+- **Diverse Pet Selection**  
+  - **Dog**: Loyal and energetic  
+  - **Fox**: Clever and playful  
+  - **Snake**: Mysterious and elegant  
 
-By default, Replit runs the `dev` script, but you can configure it by changing the `run` field in the [configuration file](#.replit). Here are the vite docs for [serving production websites](https://vitejs.dev/guide/build.html)
+- **Engaging Interaction Methods**  
+  - Real-time webcam feeding system  
+  - Intelligent dialogue system  
+  - Status monitoring system  
+  - Dynamic facial expressions and animations  
 
-### Typescript
+- **Visual Experience**  
+  - Retro pixel art interface  
+  - Matrix-style code rain background  
+  - Smooth animations  
+  - Draggable window-based UI  
 
-Just rename any file from `.jsx` to `.tsx`. You can also try our [TypeScript Template](https://replit.com/@replit/React-TypeScript)
+## 🛠 Tech Stack  
+
+- React 18  
+- Vite  
+- Three.js  
+- Tailwind CSS  
+- WebGL  
+- Web Audio API
+  
+# 🎮 Gameplay  
+
+1. **Start the Game**  
+   - Enter a pet name  
+   - Receive a randomly assigned virtual pet  
+
+2. **Take Care of Your Pet**  
+   - Feed your pet by showing objects to the webcam  
+   - Interact with your pet through conversations  
+   - Maintain health and mood levels  
+
+3. **Status Monitoring**  
+   - If health drops below 30%, your pet will get sick  
+   - If mood drops below 30%, your pet will feel sad  
+   - If either value reaches 0, the game ends  
+
+## 📝 Important Notes  
+
+- Browser camera access is required  
+- Best played on modern browsers (Chrome, Firefox, Safari)  
+- Headphones are recommended for an optimal audio experience  
+
+## 🎵 Sound Effects  
+
+- Background music at a balanced volume  
+- Interactive sound effects included  
+- All sounds can be controlled through the interface  
+
+## 🤝 Contribution Guide  
+
+We welcome Issues and Pull Requests!
