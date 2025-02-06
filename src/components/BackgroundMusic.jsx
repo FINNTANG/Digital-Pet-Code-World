@@ -1,55 +1,53 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 const BackgroundMusic = ({ audioUrl }) => {
-  const audioRef = useRef(document.getElementById('backgroundMusic'));
+  const audioRef = useRef(new Audio('./background-music.mp3'));
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     const audio = audioRef.current;
-    if (audio) {
-      audio.load();
-      audio.volume = 0.2;
+    audio.loop = true;
+    audio.volume = 0.3;
 
-      const handleCanPlayThrough = () => {
-        console.log('Audio can play through');
-      };
+    const handleCanPlayThrough = () => {
+      console.log('Audio can play through');
+    };
 
-      const handleError = (e) => {
-        console.error('Audio error:', e);
-      };
+    const handleError = (e) => {
+      console.error('Audio error:', e);
+    };
 
-      audio.addEventListener('canplaythrough', handleCanPlayThrough);
-      audio.addEventListener('error', handleError);
+    audio.addEventListener('canplaythrough', handleCanPlayThrough);
+    audio.addEventListener('error', handleError);
 
-      const handleFirstInteraction = () => {
-        try {
-          const playPromise = audio.play();
-          if (playPromise !== undefined) {
-            playPromise
-              .then(() => {
-                setIsPlaying(true);
-                console.log('Audio started playing');
-                document.removeEventListener('click', handleFirstInteraction);
-              })
-              .catch((error) => {
-                console.error('Play failed:', error);
-              });
-          }
-        } catch (error) {
-          console.error('Play error:', error);
+    const handleFirstInteraction = () => {
+      try {
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsPlaying(true);
+              console.log('Audio started playing');
+              document.removeEventListener('click', handleFirstInteraction);
+            })
+            .catch((error) => {
+              console.error('Play failed:', error);
+            });
         }
-      };
+      } catch (error) {
+        console.error('Play error:', error);
+      }
+    };
 
-      document.addEventListener('click', handleFirstInteraction);
+    document.addEventListener('click', handleFirstInteraction);
 
-      return () => {
-        audio.removeEventListener('canplaythrough', handleCanPlayThrough);
-        audio.removeEventListener('error', handleError);
-        document.removeEventListener('click', handleFirstInteraction);
-        audio.pause();
-        audio.currentTime = 0;
-      };
-    }
+    return () => {
+      audio.removeEventListener('canplaythrough', handleCanPlayThrough);
+      audio.removeEventListener('error', handleError);
+      document.removeEventListener('click', handleFirstInteraction);
+      audio.pause();
+      audio.currentTime = 0;
+    };
   }, []);
 
   const togglePlay = () => {

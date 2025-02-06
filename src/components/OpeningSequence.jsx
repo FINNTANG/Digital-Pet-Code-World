@@ -47,14 +47,15 @@ const MatrixRain = () => {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        ctx.fillStyle = '#0F0';
-        ctx.font = `${fontSize}px monospace`;
+        ctx.fillStyle = '#00ff66';
+        ctx.font = fontSize + 'px monospace';
         
-        for(let i = 0; i < rainDrops.length; i++) {
+        for (let i = 0; i < rainDrops.length; i++) {
           const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-          ctx.fillText(text, i*fontSize, rainDrops[i]*fontSize);
+          ctx.fillStyle = `rgba(0, 255, 102, ${Math.random() * 0.5 + 0.5})`;
+          ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
           
-          if(rainDrops[i]*fontSize > canvas.height && Math.random() > 0.975) {
+          if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
             rainDrops[i] = 0;
           }
           rainDrops[i]++;

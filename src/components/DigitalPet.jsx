@@ -94,6 +94,7 @@ const DigitalPet = () => {
   const [isTypingPersist, setIsTypingPersist] = useState(false);
   const [isApiCalling, setIsApiCalling] = useState(false);
   const apiTimeoutRef = useRef(null);
+  const [isGameOver, setIsGameOver] = useState(false);
 
   // 修改宠物类型状态的初始化
   const [petType, setPetType] = useState(() => {
@@ -153,17 +154,41 @@ Have fun with your new digital friend! ✨`;
     };
   }, []);
 
-  // 修改状态更新速度
+  // 修改状态更新的 useEffect
   useEffect(() => {
     const interval = setInterval(() => {
-      petState.health = Math.max(0, petState.health - 1); // 每3秒降低1点健康值
-      petState.happiness = Math.max(0, petState.happiness - 1); // 每3秒降低1点心情值
+      // 更新状态值但不低于0
+      petState.health = Math.max(0, petState.health - 1);
+      petState.happiness = Math.max(0, petState.happiness - 1);
       petState.updateState();
       setStatus(petState.state);
-    }, 3000); // 保持3秒的间隔
+
+      // 根据状态更新宠物显示
+      let newSprite;
+      // 当任一状态为0时就触发游戏结束
+      if (petState.health <= 0 || petState.happiness <= 0) {
+        setIsGameOver(true);
+      } else if (petState.health <= 30 || petState.happiness <= 30) {
+        // 当任一状态低于30时随机显示 sick 或 sad 动画
+        newSprite = {
+          src: `/sprites/${petType}/${Math.random() < 0.5 ? 'sick' : 'sad'}.gif`,
+          size: '200px'
+        };
+      } else {
+        // 正常状态的宠物
+        newSprite = {
+          src: `/sprites/${petType}/normal.gif`,
+          size: '200px'
+        };
+      }
+      
+      if (newSprite) {  // 确保只在有有效的精灵时更新
+        setCurrentSprite(newSprite);
+      }
+    }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [petType]);
 
   const startCamera = async () => {
     try {
@@ -260,7 +285,7 @@ Have fun with your new digital friend! ✨`;
         });
         setShowAnalysis(true);
         
-        const result = await analyzeImage(imageData);
+        const result = await analyzeImage(imageData, petType);
         
         clearTimeout(apiTimeoutRef.current);
         
@@ -323,9 +348,24 @@ Have fun with your new digital friend! ✨`;
   const handleChat = () => {
     setShowChat(true);
     
-    // 初始对话，不需要API调用
+    // 根据不同宠物类型生成不同的初始对话
+    let initialMessage;
+    switch (petType) {
+      case 'dog':
+        initialMessage = `*Wags tail excitedly* Woof! I'm ${petState.happiness}% happy and ${petState.health}% healthy. Ready for fun? =)`;
+        break;
+      case 'fox':
+        initialMessage = `*Flicks tail mischievously* Hey! ${petState.happiness}% joy and ${petState.health}% vigor here. What's the plan? =)`;
+        break;
+      case 'snake':
+        initialMessage = `*Sways smoothly* Greetingsss! Feeling ${petState.happiness}% cheerful and ${petState.health}% vital. Shall we chat? =)`;
+        break;
+      default:
+        initialMessage = `*Greets happily* Hey there! I'm ${petState.happiness}% happy and ${petState.health}% healthy. What's up? =)`;
+    }
+    
     const initialDialogue = {
-      message: `*Purrs softly* Hello! My current mood is ${petState.happiness}% and health is ${petState.health}%. How can I help you today?`,
+      message: initialMessage,
       options: [
         "How are you feeling?",
         "Want to play a game?",
@@ -338,97 +378,98 @@ Have fun with your new digital friend! ✨`;
   };
 
   const handleResponse = async (option) => {
-    if (isApiCalling) {
-      setPersistMessage("I'm still thinking about your last message...");
-      setShowPersistMessage(true);
-      setTimeout(() => setShowPersistMessage(false), 3000);
-      return;
-    }
-
+    if (isWaitingResponse) return;
+    
     setIsWaitingResponse(true);
-    setDisplayedMessage("");
-    setIsApiCalling(true);
+    setDisplayedMessage("Thinking about your message");  // 移除了末尾的 "..."
     
-    // 设置加载动画文本
-    setDisplayedMessage(
-      "Thinking about your message..."
-    );
-    
-    setDialogue({
-      message: "",
-      options: []
-    });
-
     try {
-      const timeoutPromise = new Promise((_, reject) => {
-        apiTimeoutRef.current = setTimeout(() => {
-          reject(new Error('Request timeout'));
-        }, 20000);
-      });
-
-      const response = await Promise.race([
-        chatMessage(petState.health, petState.happiness, option),
-        timeoutPromise
-      ]);
-
-      clearTimeout(apiTimeoutRef.current);
+      const response = await chatMessage(
+        petState.health, 
+        petState.happiness, 
+        option,
+        petType
+      );
       
-      if (response && response.result) {
-        // 先设置新的选项，确保对话可以继续
-        setDialogue({
-          message: response.message,
-          options: response.options || ["Tell me more", "That's interesting", "How are you feeling?"] // 提供默认选项
-        });
+      if (response.result) {
+        setDialogue(response);
+        typeMessage(response.message);
         
-        // 使用较慢的打字效果
-        const typeMessageOptimized = async (text) => {
-          let index = 0;
-          const length = text.length;
-          
-          const animate = () => {
-            if (index < length) {
-              setDisplayedMessage(text.slice(0, index + 1));
-              index++;
-              // 使用 setTimeout 代替 requestAnimationFrame 来减慢速度
-              setTimeout(animate, 50); // 增加到50ms的延迟
-            }
-          };
-          
-          animate();
-        };
-        
-        await typeMessageOptimized(response.message);
-        
-        // 更新宠物状态
-        petState.health = Math.min(100, Math.max(0, petState.health + response.health));
-        petState.happiness = Math.min(100, Math.max(0, petState.happiness + response.mood));
+        // 更新状态
+        petState.health = Math.max(0, Math.min(100, petState.health + response.health));
+        petState.happiness = Math.max(0, Math.min(100, petState.happiness + response.mood));
+        petState.updateState();
         setStatus(petState.state);
       } else {
-        // 如果API响应没有选项，提供默认选项以继续对话
-        setDialogue({
-          message: "I'm enjoying our chat! What else would you like to talk about?",
-          options: [
-            "Tell me about your day",
-            "What makes you happy?",
-            "Let's talk about something else"
-          ]
-        });
+        // API 调用失败时的备用回答
+        const fallbackResponses = [
+          {
+            message: "Oh! I got a bit distracted there. But I'm always happy to chat!",
+            options: [
+              "Tell me about your day",
+              "What's your favorite activity?",
+              "Let's try something else"
+            ],
+            health: 5,
+            mood: 5
+          },
+          {
+            message: "Hmm... I was daydreaming! What were we talking about?",
+            options: [
+              "Want to play a game?",
+              "How are you feeling?",
+              "Tell me a story"
+            ],
+            health: 5,
+            mood: 5
+          },
+          {
+            message: "Sorry, I was chasing a virtual butterfly! Back now!",
+            options: [
+              "That sounds fun!",
+              "What else do you like to do?",
+              "Let's chat more"
+            ],
+            health: 5,
+            mood: 5
+          }
+        ];
+
+        // 随机选择一个备用回答
+        const fallbackResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+        setDialogue(fallbackResponse);
+        typeMessage(fallbackResponse.message);
+        
+        // 使用备用回答的状态更新
+        petState.health = Math.max(0, Math.min(100, petState.health + fallbackResponse.health));
+        petState.happiness = Math.max(0, Math.min(100, petState.happiness + fallbackResponse.mood));
+        petState.updateState();
+        setStatus(petState.state);
       }
     } catch (error) {
-      console.error('Response generation failed:', error);
-      // 即使在错误情况下也提供选项以继续对话
-      setDialogue({
-        message: "Sorry, I got distracted for a moment. What were you saying?",
+      console.error('Response error:', error);
+      // 发生错误时也使用备用回答系统
+      const errorResponse = {
+        message: "Oops! My virtual brain had a hiccup. But I'm still here!",
         options: [
-          "Let's try again",
-          "No problem, let's chat",
-          "Tell me something fun"
-        ]
-      });
+          "No worries, let's continue",
+          "Tell me something fun",
+          "How are you doing?"
+        ],
+        health: 5,
+        mood: 5
+      };
+      
+      setDialogue(errorResponse);
+      typeMessage(errorResponse.message);
+      
+      // 使用错误回答的状态更新
+      petState.health = Math.max(0, Math.min(100, petState.health + errorResponse.health));
+      petState.happiness = Math.max(0, Math.min(100, petState.happiness + errorResponse.mood));
+      petState.updateState();
+      setStatus(petState.state);
     } finally {
       setIsWaitingResponse(false);
-      setIsApiCalling(false);
-      clearTimeout(apiTimeoutRef.current);
     }
   };
 
@@ -727,6 +768,27 @@ Have fun with your new digital friend! ✨`;
     };
   }, []);
 
+  // 修改重启游戏函数
+  const handleRestart = () => {
+    petState.health = 100;
+    petState.happiness = 100;
+    petState.updateState();
+    setStatus(petState.state);
+    setIsGameOver(false);
+    
+    // 重置宠物显示
+    setCurrentSprite({
+      src: `/sprites/${petType}/normal.gif`,
+      size: '200px'
+    });
+    
+    // 重置其他状态
+    setShowCamera(false);
+    setShowChat(false);
+    setShowHint(false);
+    setShowAnalysis(false);
+  };
+
   return (
     <div className="w-full h-full relative">
       {/* 状态条 */}
@@ -770,18 +832,21 @@ Have fun with your new digital friend! ✨`;
             </button>
           </div>
           <div className="pet-content">
-            <div 
-              className="pet-sprite"
-              style={{
-                backgroundImage: `url(${currentSprite.src})`,
-                width: currentSprite.size,
-                height: currentSprite.size,
-                backgroundSize: 'contain',
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'center',
-                imageRendering: 'pixelated'
-              }}
-            />
+            {currentSprite && currentSprite.src && (
+              <div 
+                className="pet-sprite"
+                style={{
+                  backgroundImage: `url(${currentSprite.src})`,
+                  width: currentSprite.size,
+                  height: currentSprite.size,
+                  backgroundSize: 'contain',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'center',
+                  imageRendering: 'pixelated',
+                  display: 'block'  // 确保宠物始终显示
+                }}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -995,6 +1060,29 @@ Have fun with your new digital friend! ✨`;
           </div>
           <div className="persist-message-content">
             <div className="typing-text">{persistMessage}</div>
+          </div>
+        </div>
+      )}
+
+      {/* 游戏结束界面 */}
+      {isGameOver && (
+        <div className="game-over-overlay">
+          <div className="game-over-window">
+            <div className="window-toolbar">
+              <span className="window-title">SYSTEM.EXE</span>
+            </div>
+            <div className="game-over-content">
+              <div className="glitch-text">GAME OVER</div>
+              <div className="game-over-message">
+                Your virtual pet has shut down...
+              </div>
+              <button 
+                className="restart-button"
+                onClick={handleRestart}
+              >
+                RESTART SYSTEM
+              </button>
+            </div>
           </div>
         </div>
       )}

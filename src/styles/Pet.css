@@ -1725,7 +1725,14 @@ body::after,
 }
 
 .chat-window {
-  width: 400px;
+  background: rgba(0, 0, 0, 0.95);
+  border: 2px solid #ffffff;
+  width: 500px;  /* 从原来的宽度改为 500px */
+  position: fixed;
+  z-index: 1000;
+  font-family: 'Press Start 2P', cursive;
+  cursor: move;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
 }
 
 .hint-window {
@@ -1788,6 +1795,7 @@ body::after,
   flex-direction: column;
   gap: 12px;
   padding: 10px;
+  width: 100%;  /* 确保选项按钮宽度合适 */
 }
 
 .chat-option {
@@ -2130,27 +2138,32 @@ body::after,
 /* 添加图像识别结果窗口样式 */
 .analysis-window {
   background: rgba(0, 0, 0, 0.95);
-  border: 2px solid #ffffff; /* 改为白色边框 */
-  width: 400px;
+  border: 2px solid #ffffff;
+  width: 500px;  /* 改为 500px */
   position: fixed;
   z-index: 1000;
   font-family: 'Press Start 2P', cursive;
   cursor: move;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); /* 添加白色阴影 */
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
 }
 
 .analysis-content {
   padding: 20px;
-  color: #00ff66;
-  font-size: 16px;
-  line-height: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .analysis-image {
   width: 100%;
   height: auto;
-  margin-bottom: 20px;
-  border: 1px solid #00ff66;
+  border: 2px solid #00ff66;
+}
+
+/* 添加分析结果中 Reason 的样式 */
+.analysis-result .reason {
+  color: #00ff66;  /* 使用网页常用的绿色 */
+  text-shadow: 0 0 8px rgba(0, 255, 102, 0.5);  /* 添加发光效果 */
 }
 
 .analysis-result {
@@ -2626,13 +2639,181 @@ body::after,
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  padding: 20px;  /* 增加内边距 */
 }
 
 .chat-message {
   flex-grow: 1;
   padding: 15px;
   font-family: 'Press Start 2P', cursive;
-  line-height: 1.6;
+  line-height: 1.8;  /* 增加行高 */
   white-space: pre-wrap;
+  word-wrap: break-word;  /* 添加自动换行 */
+  max-width: 460px;  /* 确保文字不会溢出 */
+}
+
+/* 游戏结束界面样式 */
+.game-over-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.game-over-window {
+  background: rgba(0, 0, 0, 0.95);
+  border: 2px solid #ff0000;
+  width: 500px;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+}
+
+.game-over-content {
+  padding: 40px;
+  text-align: center;
+}
+
+.glitch-text {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 36px;
+  color: #ff0000;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+  margin-bottom: 30px;
+  animation: glitchText 1s infinite;
+}
+
+.game-over-message {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 16px;
+  color: #ffffff;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.restart-button {
+  background: transparent;
+  border: 2px solid #00ff66;
+  color: #00ff66;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 18px;
+  padding: 15px 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.restart-button:hover {
+  background: rgba(0, 255, 102, 0.1);
+  box-shadow: 0 0 15px rgba(0, 255, 102, 0.3);
+  transform: translateY(-2px);
+}
+
+@keyframes glitchText {
+  0% {
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+    transform: translateX(0);
+  }
+  25% {
+    text-shadow: -2px 0 10px rgba(255, 0, 0, 0.7);
+    transform: translateX(2px);
+  }
+  50% {
+    text-shadow: 2px 0 10px rgba(255, 0, 0, 0.7);
+    transform: translateX(-2px);
+  }
+  75% {
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+    transform: translateX(1px);
+  }
+  100% {
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+    transform: translateX(0);
+  }
+}
+
+/* 修改思考提示词的样式 */
+.chat-message {
+  flex-grow: 1;
+  padding: 15px;
+  font-family: 'Press Start 2P', cursive;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-width: 460px;
+  min-height: 80px;  /* 添加最小高度确保足够空间 */
+}
+
+/* 专门为思考提示添加样式 */
+.chat-message.thinking {
+  font-size: 14px;  /* 稍微调小字体 */
+  white-space: nowrap;  /* 防止换行 */
+  overflow: visible;  /* 确保文字完全显示 */
+  padding-top: 30px;  /* 增加上边距让文字居中显示 */
+}
+
+/* 修改分析结果中各部分的样式 */
+.analysis-result {
+  padding: 15px;
+  background: rgba(0, 255, 102, 0.05);
+  border: 1px solid #00ff66;
+  font-family: 'Press Start 2P', cursive;
+}
+
+/* Content 部分保持白色 */
+.analysis-result div:first-child {
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+/* Status 部分根据喜好变色 */
+.analysis-result div:nth-child(2) {
+  margin-bottom: 10px;
+}
+.analysis-result div:nth-child(2).text-green-500 {
+  color: #00ff66;
+  text-shadow: 0 0 8px rgba(0, 255, 102, 0.5);
+}
+.analysis-result div:nth-child(2).text-red-500 {
+  color: #ff4444;
+  text-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
+}
+
+/* Reason 部分改为绿色 */
+.analysis-result div:nth-child(3) {
+  color: #00ff66;
+  text-shadow: 0 0 8px rgba(0, 255, 102, 0.5);
+  margin-bottom: 10px;
+}
+
+/* Effects 标题改为绿色 */
+.analysis-result div:nth-child(4) {
+  color: #00ff66;
+  text-shadow: 0 0 8px rgba(0, 255, 102, 0.5);
+  margin-bottom: 10px;
+}
+
+/* Mood 部分根据正负值变色 */
+.analysis-result div:nth-child(5).text-green-500 {
+  color: #00ff66;
+  text-shadow: 0 0 8px rgba(0, 255, 102, 0.5);
+}
+.analysis-result div:nth-child(5).text-red-500 {
+  color: #ff4444;
+  text-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
+}
+
+/* Health 部分根据正负值变色 */
+.analysis-result div:nth-child(6).text-green-500 {
+  color: #00ff66;
+  text-shadow: 0 0 8px rgba(0, 255, 102, 0.5);
+}
+.analysis-result div:nth-child(6).text-red-500 {
+  color: #ff4444;
+  text-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
 }
 

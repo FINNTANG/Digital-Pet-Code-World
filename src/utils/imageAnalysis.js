@@ -1,4 +1,4 @@
-async function analyzeImage(base64Image) {
+async function analyzeImage(base64Image, petType) {
     try {
       const response = await fetch('https://chat-gpt-4-turbo1.p.rapidapi.com/', {
         method: 'POST',
@@ -16,18 +16,16 @@ async function analyzeImage(base64Image) {
               content: [
                 {
                   type: 'text',
-                  text: 'Got it! Please provide the image, and I will return the required fields in JSON format based on the information you need. Translate into English and respond entirely in English：1.The content of the image 2.Whether the pet likes it 3.The specific reason for liking or not liking it (keep reason within 10 words) 4.The impact of this item on the pet mood (positive or negative number) 5.The impact of this item on the pet health (positive or negative number). The specific format is as follows：{result: true, name: The content of the recognized image, isLike: Whether it is liked, reason: The reason for liking or disliking (brief), moodEffect: Happiness impact, healthEffect: Health impact}'
+                  text: `As a ${petType} virtual pet, I will analyze the image and return the required fields in JSON format based on the information you need. Translate into English and respond entirely in English：1.The content of the image 2.Whether the pet likes it 3.The specific reason for liking or not liking it (give a witty and humorous reason in 10 words) 4.The impact of this item on the pet mood (positive or negative number) 5.The impact of this item on the pet health (positive or negative number). The specific format is as follows：{result: true, name: The content of the recognized image, isLike: Whether it is liked, reason: The reason for liking or disliking (brief), moodEffect: Happiness impact, healthEffect: Health impact}`
                 },
                 {
                   type: 'image_url',
-                  image_url: {
-                    url: base64Image,
-                  },
-                },
-              ],
-            },
-          ],
-        }),
+                  image_url: base64Image
+                }
+              ]
+            }
+          ]
+        })
       });
   
       const data = await response.json();
@@ -40,7 +38,7 @@ async function analyzeImage(base64Image) {
       return parsedContent;
     } catch (error) {
       console.error('图片分析失败:', error);
-      return { result: false };
+      return null;
     }
   }
   
