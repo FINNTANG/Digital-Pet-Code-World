@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { setPetName } from '../utils/petState';
+import { setPetName, setPetInfo } from '../utils/petState';
 import { useNavigate } from 'react-router-dom';
 import SoundEffect from './SoundEffect';
 
@@ -14,61 +14,67 @@ const FontLoader = () => (
 const MatrixRain = () => {
   const canvasRef = useRef(null);
   const animationFrameRef = useRef(null);
-  
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    
-    const katakana = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+
+    const katakana =
+      'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
     const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const nums = '0123456789';
     const alphabet = katakana + latin + nums;
-    
+
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     };
-    
+
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
-    
+
     const fontSize = 16;
-    const columns = canvas.width/fontSize;
+    const columns = canvas.width / fontSize;
     const rainDrops = Array(Math.floor(columns)).fill(1);
-    
+
     let lastTime = 0;
     const fps = 30;
     const frameInterval = 1000 / fps;
-    
+
     const draw = (currentTime) => {
       const deltaTime = currentTime - lastTime;
-      
+
       if (deltaTime > frameInterval) {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
+
         ctx.fillStyle = '#00ff66';
         ctx.font = fontSize + 'px monospace';
-        
+
         for (let i = 0; i < rainDrops.length; i++) {
-          const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+          const text = alphabet.charAt(
+            Math.floor(Math.random() * alphabet.length),
+          );
           ctx.fillStyle = `rgba(0, 255, 102, ${Math.random() * 0.5 + 0.5})`;
           ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
-          
-          if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+
+          if (
+            rainDrops[i] * fontSize > canvas.height &&
+            Math.random() > 0.975
+          ) {
             rainDrops[i] = 0;
           }
           rainDrops[i]++;
         }
-        
+
         lastTime = currentTime;
       }
-      
+
       animationFrameRef.current = requestAnimationFrame(draw);
     };
-    
+
     animationFrameRef.current = requestAnimationFrame(draw);
-    
+
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
@@ -76,7 +82,7 @@ const MatrixRain = () => {
       window.removeEventListener('resize', resizeCanvas);
     };
   }, []);
-  
+
   return (
     <canvas
       ref={canvasRef}
@@ -87,7 +93,7 @@ const MatrixRain = () => {
         width: '100%',
         height: '100%',
         opacity: 0.15,
-        willChange: 'transform' // 优化渲染性能
+        willChange: 'transform', // 优化渲染性能
       }}
     />
   );
@@ -102,17 +108,24 @@ const PixelStyleText = ({ children, className = '', style = {} }) => (
       textShadow: '0 0 3px #00ff00, 0 0 6px #00ff00',
       color: '#00ff00',
       fontWeight: '700',
-      ...style
+      ...style,
     }}
   >
     {children}
   </div>
 );
 
-const TypewriterText = ({ text, onComplete, delay = 100, className = '', showCursor = true, fadeOut = false }) => {
+const TypewriterText = ({
+  text,
+  onComplete,
+  delay = 100,
+  className = '',
+  showCursor = true,
+  fadeOut = false,
+}) => {
   const [displayText, setDisplayText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
-  
+
   useEffect(() => {
     let index = 0;
     const intervalId = setInterval(() => {
@@ -132,7 +145,7 @@ const TypewriterText = ({ text, onComplete, delay = 100, className = '', showCur
   }, [text, delay, onComplete]);
 
   return (
-    <PixelStyleText 
+    <PixelStyleText
       className={`typewriter ${className}`}
       style={{
         letterSpacing: '2px',
@@ -144,13 +157,15 @@ const TypewriterText = ({ text, onComplete, delay = 100, className = '', showCur
         opacity: fadeOut ? 0 : 1,
         filter: fadeOut ? 'blur(2px)' : 'blur(0)',
         transform: fadeOut ? 'scale(0.98)' : 'scale(1)',
-        textShadow: fadeOut 
-          ? 'none' 
-          : '0 0 4px #00ff00, 0 0 8px #00ff00, 0 0 12px #00ff00'
+        textShadow: fadeOut
+          ? 'none'
+          : '0 0 4px #00ff00, 0 0 8px #00ff00, 0 0 12px #00ff00',
       }}
     >
       <span className="typing-text">{displayText}</span>
-      {showCursor && <span className={`typing-cursor ${fadeOut ? 'fade-out' : ''}`}></span>}
+      {showCursor && (
+        <span className={`typing-cursor ${fadeOut ? 'fade-out' : ''}`}></span>
+      )}
     </PixelStyleText>
   );
 };
@@ -158,7 +173,7 @@ const TypewriterText = ({ text, onComplete, delay = 100, className = '', showCur
 const OpeningSequence = ({ onStartGame }) => {
   const navigate = useNavigate();
   const [phase, setPhase] = useState('title');
-  const [petName, setPetNameState] = useState('');
+  const [selectedPet, setSelectedPet] = useState(null);
   const [fadeOutTitle, setFadeOutTitle] = useState(false);
   const [fadeOutPrompt, setFadeOutPrompt] = useState(false);
   const [showInput, setShowInput] = useState(false);
@@ -166,18 +181,46 @@ const OpeningSequence = ({ onStartGame }) => {
   const [showPrompt, setShowPrompt] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const handleNameSubmit = () => {
-    if (petName.trim() && !isTransitioning) {
+  const pets = [
+    {
+      type: 'fox',
+      name: 'Lingling',
+      traits: ['clever', 'spiritual'],
+      emoji: '🦊',
+    },
+    {
+      type: 'dog',
+      name: 'Xiao Mo',
+      traits: ['loyal', 'devoted'],
+      emoji: '🐕',
+    },
+    {
+      type: 'snake',
+      name: 'Jing',
+      traits: ['healing', 'mysterious'],
+      emoji: '🐍',
+    },
+  ];
+
+  const handlePetSelect = (pet) => {
+    if (!isTransitioning) {
       SoundEffect.playClick();
       setIsTransitioning(true);
-      setPetName(petName.trim());
+      setSelectedPet(pet);
+      setPetName(pet.name);
+      setPetInfo({
+        name: pet.name,
+        type: pet.type,
+        traits: pet.traits,
+        emoji: pet.emoji,
+      });
       setFadeOutPrompt(true);
-      
+
       setTimeout(() => {
         setShowPrompt(false);
         setShowInput(false);
       }, 1000);
-      
+
       setTimeout(() => {
         setPhase('play');
         setShowPlay(true);
@@ -190,7 +233,7 @@ const OpeningSequence = ({ onStartGame }) => {
     if (!isTransitioning) {
       setIsTransitioning(true);
       setFadeOutTitle(true);
-      
+
       setTimeout(() => {
         setPhase('input');
         setShowInput(true);
@@ -201,30 +244,29 @@ const OpeningSequence = ({ onStartGame }) => {
   };
 
   const handlePlay = () => {
-    if (petName.trim()) {
+    if (selectedPet) {
       SoundEffect.playClick();
-      setPetName(petName.trim());
       onStartGame();
       navigate('/game');
     }
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
+    <div className="relative flex items-center justify-center min-h-screen overflow-hidden bg-black">
       <FontLoader />
       <MatrixRain />
-      
+
       <div className="relative z-10 flex flex-col items-center justify-center gap-8 px-4">
         {phase === 'title' && (
-          <div 
+          <div
             style={{
               padding: '20px 0',
               marginTop: '20px',
               opacity: fadeOutTitle ? 0 : 1,
-              transition: 'opacity 3s ease-in-out'
+              transition: 'opacity 3s ease-in-out',
             }}
           >
-            <TypewriterText 
+            <TypewriterText
               text="REALITYEATER"
               onComplete={handleInitialize}
               delay={200}
@@ -234,77 +276,106 @@ const OpeningSequence = ({ onStartGame }) => {
         )}
 
         {showPrompt && phase === 'input' && (
-          <div className={`text-2xl mt-4 transition-opacity duration-1000 ${fadeOutPrompt ? 'opacity-0' : 'opacity-100'}`}>
-            <PixelStyleText style={{
-              textShadow: '0 0 2px #00ff00, 0 0 4px #00ff00',
-              fontSize: '32px',
-              letterSpacing: '2px'
-            }}>
-              Please name your virtual pet...
+          <div
+            className={`text-2xl mt-4 transition-opacity duration-1000 ${
+              fadeOutPrompt ? 'opacity-0' : 'opacity-100'
+            }`}
+          >
+            <PixelStyleText
+              style={{
+                textShadow: '0 0 2px #00ff00, 0 0 4px #00ff00',
+                fontSize: '32px',
+                letterSpacing: '2px',
+              }}
+            >
+              Choose your virtual companion...
             </PixelStyleText>
           </div>
         )}
 
         {(showInput || fadeOutPrompt) && phase === 'input' && (
-          <div 
-            className="flex flex-col items-center gap-6 mt-8"
+          <div
+            className="flex flex-row items-center justify-center gap-8 mt-8"
             style={{
-              animation: fadeOutPrompt ? 'fadeOut 1s ease-out forwards' : 'fadeIn 1s ease-out forwards',
+              animation: fadeOutPrompt
+                ? 'fadeOut 1s ease-out forwards'
+                : 'fadeIn 1s ease-out forwards',
               opacity: fadeOutPrompt ? 0 : 1,
               transition: 'all 1s ease-in-out',
-              transform: fadeOutPrompt ? 'translateY(20px)' : 'translateY(0)'
+              transform: fadeOutPrompt ? 'translateY(20px)' : 'translateY(0)',
             }}
           >
-            <input
-              type="text"
-              value={petName}
-              onChange={(e) => setPetNameState(e.target.value)}
-              placeholder="REALITYEATER"
-              className="bg-black border-2 border-green-500 text-green-500 px-6 py-3 w-72 focus:outline-none"
-              style={{
-                fontFamily: "'VT323', monospace",
-                boxShadow: '0 0 4px #00ff00',
-                textShadow: '0 0 2px #00ff00',
-                fontSize: '24px',
-                letterSpacing: '2px',
-                fontWeight: '700',
-                animation: 'glowPulse 2s infinite'
-              }}
-            />
-            <button
-              onClick={handleNameSubmit}
-              className="mt-4 px-8 py-3 bg-transparent border-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-black transition-all duration-300"
-              style={{
-                fontFamily: "'VT323', monospace",
-                boxShadow: '0 0 4px #00ff00',
-                textShadow: '0 0 2px #00ff00',
-                fontSize: '24px',
-                letterSpacing: '2px',
-                fontWeight: '700',
-                animation: 'glowPulse 2s infinite'
-              }}
-            >
-              INITIALIZE
-            </button>
+            {pets.map((pet) => (
+              <button
+                key={pet.type}
+                onClick={() => handlePetSelect(pet)}
+                className="flex flex-col items-center gap-4 p-6 text-green-500 transition-all duration-300 transform bg-transparent border-2 border-green-500 hover:bg-green-500 hover:text-black hover:scale-105"
+                style={{
+                  fontFamily: "'VT323', monospace",
+                  boxShadow: '0 0 8px #00ff00',
+                  minWidth: '200px',
+                  cursor: 'pointer',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: '48px',
+                    textShadow: '0 0 4px #00ff00, 0 0 8px #00ff00',
+                    fontWeight: '700',
+                  }}
+                >
+                  {pet.name}
+                </div>
+                <div
+                  style={{
+                    fontSize: '28px',
+                    letterSpacing: '2px',
+                    fontWeight: '700',
+                    textShadow: '0 0 2px currentColor',
+                  }}
+                >
+                  {pet.emoji}
+                </div>
+                <div
+                  className="flex flex-col gap-1"
+                  style={{
+                    fontSize: '18px',
+                    letterSpacing: '1px',
+                  }}
+                >
+                  {pet.traits.map((trait, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        textTransform: 'uppercase',
+                        opacity: 0.8,
+                      }}
+                    >
+                      • {trait}
+                    </div>
+                  ))}
+                </div>
+              </button>
+            ))}
           </div>
         )}
 
         {phase === 'play' && !isTransitioning && (
-          <div 
+          <div
             className="mt-8"
             style={{
               animation: 'fadeIn 1s ease-out forwards',
               opacity: 0,
               transform: 'translateY(-20px)',
-              transition: 'all 1s ease-in-out'
+              transition: 'all 1s ease-in-out',
             }}
           >
             <button
               onClick={handlePlay}
-              className="text-3xl px-12 py-4 bg-transparent border-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-black transition-all duration-300 transform hover:scale-105"
+              className="px-12 py-4 text-3xl text-green-500 transition-all duration-300 transform bg-transparent border-2 border-green-500 hover:bg-green-500 hover:text-black hover:scale-105"
               style={{
                 fontFamily: "'Press Start 2P', cursive",
-                boxShadow: '0 0 8px #00ff00'
+                boxShadow: '0 0 8px #00ff00',
               }}
             >
               PLAY
@@ -335,15 +406,16 @@ const OpeningSequence = ({ onStartGame }) => {
             transform: translateY(0);
           }
         }
-        
+
         .cursor {
           display: inline-block;
           margin-left: 4px;
           animation: blink 1s step-end infinite;
         }
-        
+
         @keyframes blink {
-          from, to {
+          from,
+          to {
             opacity: 1;
           }
           50% {
@@ -363,7 +435,7 @@ const OpeningSequence = ({ onStartGame }) => {
             text-shadow: 0 0 15px #00ff00, 0 0 30px #00ff00, 0 0 40px #00ff00;
           }
         }
-        
+
         .pixel-text {
           image-rendering: pixelated;
           -webkit-font-smoothing: none;
@@ -421,4 +493,4 @@ const OpeningSequence = ({ onStartGame }) => {
   );
 };
 
-export default OpeningSequence; 
+export default OpeningSequence;

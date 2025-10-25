@@ -78,6 +78,34 @@ class PetState {
     }
     this.updatePetState();
   }
+
+  setType(type) {
+    this.type = type;
+  }
+
+  getType() {
+    return this.type;
+  }
+
+  setTraits(traits) {
+    this.traits = traits;
+  }
+
+  getTraits() {
+    return this.traits;
+  }
+
+  setInfo(info) {
+    this.type = info.type;
+    this.traits = info.traits || [];
+  }
+
+  getInfo() {
+    return {
+      type: this.type,
+      traits: this.traits
+    };
+  }
 }
 
 const petState = new PetState();
@@ -92,4 +120,31 @@ export const getPetName = () => {
   return petName;
 };
 
-export default petState; 
+export const setPetType = (type) => {
+  petState.setType(type);
+};
+
+export const getPetType = () => {
+  return petState.getType();
+};
+
+export const setPetTraits = (traits) => {
+  petState.setTraits(traits);
+};
+
+export const getPetTraits = () => {
+  return petState.getTraits();
+};
+
+export const setPetInfo = (info) => {
+  petState.setInfo(info);
+};
+
+export const getPetInfo = () => {
+  return {
+    name: petName,
+    ...petState.getInfo()
+  };
+};
+
+export default petState;

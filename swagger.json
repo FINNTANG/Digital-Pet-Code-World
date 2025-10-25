@@ -1,0 +1,1023 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Django用户管理与LLM服务 API",
+    "description": "\n## 📖 API文档\n\n这是一个完整的用户管理和LLM服务API。\n\n### 功能模块\n- **认证模块**：用户注册、登录、登出\n- **用户管理**：个人信息管理、密码修改、头像上传\n- **LLM服务**：AI聊天、历史记录\n\n### 认证方式\n使用JWT（JSON Web Token）认证。\n\n登录后获得access_token和refresh_token：\n- access_token有效期：1小时\n- refresh_token有效期：7天\n\n在需要认证的接口中，添加请求头：\n```\nAuthorization: Bearer <access_token>\n```\n\n### 使用流程\n1. 注册账号：POST /api/auth/register/\n2. 登录获取Token：POST /api/auth/login/\n3. 使用Token访问其他API\n4. Token过期时刷新：POST /api/token/refresh/\n",
+    "termsOfService": "",
+    "contact": { "email": "admin@example.com" },
+    "license": { "name": "MIT License" },
+    "version": "v1"
+  },
+  "host": "localhost:8000",
+  "schemes": ["http"],
+  "basePath": "/api",
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "securityDefinitions": {
+    "Bearer": { "type": "apiKey", "name": "Authorization", "in": "header" }
+  },
+  "security": [{ "Bearer": [] }],
+  "paths": {
+    "/auth/login/": {
+      "post": {
+        "operationId": "auth_login",
+        "summary": "用户登录API",
+        "description": "支持使用用户名或邮箱登录\n\n请求格式：\nPOST /api/auth/login/\n{\n    \"username\": \"testuser\",  // 或使用email\n    \"password\": \"SecurePass123!\"\n}\n\n响应格式：\n{\n    \"status\": \"success\",\n    \"message\": \"登录成功\",\n    \"data\": {\n        \"user\": { ... },\n        \"tokens\": { ... }\n    }\n}",
+        "parameters": [],
+        "responses": { "201": { "description": "" } },
+        "tags": ["auth"]
+      },
+      "parameters": []
+    },
+    "/auth/logout/": {
+      "post": {
+        "operationId": "auth_logout",
+        "summary": "用户登出API",
+        "description": "将Refresh Token加入黑名单（需要启用token blacklist）\n\n请求格式：\nPOST /api/auth/logout/",
+        "parameters": [],
+        "responses": { "201": { "description": "" } },
+        "tags": ["auth"]
+      },
+      "parameters": []
+    },
+    "/auth/register/": {
+      "post": {
+        "operationId": "auth_register",
+        "summary": "用户注册API",
+        "description": "请求格式：\nPOST /api/auth/register/\n{\n    \"username\": \"testuser\",\n    \"email\": \"test@example.com\",\n    \"password\": \"SecurePass123!\",\n    \"password_confirm\": \"SecurePass123!\",\n    \"phone\": \"13800138000\"  // 可选\n}\n\n响应格式：\n{\n    \"status\": \"success\",\n    \"message\": \"注册成功\",\n    \"data\": {\n        \"user\": { ... },  // 用户信息\n        \"tokens\": {       // JWT令牌\n            \"access\": \"...\",\n            \"refresh\": \"...\"\n        }\n    }\n}",
+        "parameters": [],
+        "responses": { "201": { "description": "" } },
+        "tags": ["auth"]
+      },
+      "parameters": []
+    },
+    "/llm-configs/": {
+      "get": {
+        "operationId": "llm-configs_list",
+        "summary": "获取配置列表",
+        "description": "GET /api/llm/configs/",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/LLMConfig" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["llm-configs"]
+      },
+      "post": {
+        "operationId": "llm-configs_create",
+        "summary": "创建新配置",
+        "description": "POST /api/llm/configs/\n{\n    \"name\": \"OpenAI GPT-4\",\n    \"provider\": \"openai\",\n    \"model_name\": \"gpt-4\",\n    \"api_key\": \"sk-...\",\n    \"max_tokens\": 2000,\n    \"temperature\": 0.7\n}",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/LLMConfigCreate" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/LLMConfigCreate" }
+          }
+        },
+        "tags": ["llm-configs"]
+      },
+      "parameters": []
+    },
+    "/llm-configs/{id}/": {
+      "get": {
+        "operationId": "llm-configs_read",
+        "description": "获取配置详情",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/LLMConfig" }
+          }
+        },
+        "tags": ["llm-configs"]
+      },
+      "put": {
+        "operationId": "llm-configs_update",
+        "description": "更新配置",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/LLMConfig" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/LLMConfig" }
+          }
+        },
+        "tags": ["llm-configs"]
+      },
+      "patch": {
+        "operationId": "llm-configs_partial_update",
+        "summary": "LLM配置管理API视图集",
+        "description": "仅管理员可访问。\n\n端点：\n- GET    /api/llm/configs/       # 配置列表\n- POST   /api/llm/configs/       # 创建配置\n- GET    /api/llm/configs/{id}/  # 配置详情\n- PUT    /api/llm/configs/{id}/  # 更新配置\n- DELETE /api/llm/configs/{id}/  # 删除配置",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/LLMConfig" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/LLMConfig" }
+          }
+        },
+        "tags": ["llm-configs"]
+      },
+      "delete": {
+        "operationId": "llm-configs_delete",
+        "description": "删除配置",
+        "parameters": [],
+        "responses": { "204": { "description": "" } },
+        "tags": ["llm-configs"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this LLM配置.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/llm-configs/{id}/activate/": {
+      "post": {
+        "operationId": "llm-configs_activate",
+        "summary": "激活指定配置",
+        "description": "POST /api/llm/configs/{id}/activate/",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/LLMConfig" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/LLMConfig" }
+          }
+        },
+        "tags": ["llm-configs"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this LLM配置.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/llm-configs/{id}/deactivate/": {
+      "post": {
+        "operationId": "llm-configs_deactivate",
+        "summary": "禁用指定配置",
+        "description": "POST /api/llm/configs/{id}/deactivate/",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/LLMConfig" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/LLMConfig" }
+          }
+        },
+        "tags": ["llm-configs"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this LLM配置.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
+    "/llm/chat/": {
+      "post": {
+        "operationId": "llm_chat",
+        "summary": "发送消息并获取AI回复",
+        "description": "POST /api/llm/chat/",
+        "parameters": [],
+        "responses": { "201": { "description": "" } },
+        "tags": ["llm"]
+      },
+      "parameters": []
+    },
+    "/llm/messages/": {
+      "get": {
+        "operationId": "llm_messages",
+        "summary": "获取消息历史",
+        "description": "GET /api/llm/messages/?session_id=default&limit=50\n\n查询参数：\n- session_id: 会话ID（可选，默认返回所有）\n- limit: 返回数量限制（可选，默认50）",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": { "200": { "description": "" } },
+        "tags": ["llm"]
+      },
+      "parameters": []
+    },
+    "/llm/sessions/": {
+      "get": {
+        "operationId": "llm_sessions",
+        "summary": "获取会话列表",
+        "description": "GET /api/llm/sessions/\n\n返回用户的所有会话，包含消息数量、最后消息时间等信息。",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": { "200": { "description": "" } },
+        "tags": ["llm"]
+      },
+      "parameters": []
+    },
+    "/llm/sessions/{session_id}/": {
+      "delete": {
+        "operationId": "llm_delete_session",
+        "summary": "删除指定会话的所有消息",
+        "description": "DELETE /api/llm/sessions/{session_id}/",
+        "parameters": [],
+        "responses": { "204": { "description": "" } },
+        "tags": ["llm"]
+      },
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/llm/sessions/{session_id}/clear/": {
+      "post": {
+        "operationId": "llm_sessions_clear_session",
+        "summary": "清空指定会话（与delete_session相同，提供别名）",
+        "description": "POST /api/llm/sessions/{session_id}/clear/",
+        "parameters": [],
+        "responses": { "201": { "description": "" } },
+        "tags": ["llm"]
+      },
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/llm/statistics/": {
+      "get": {
+        "operationId": "llm_statistics",
+        "summary": "获取聊天统计信息",
+        "description": "GET /api/llm/statistics/\n\n返回用户的聊天统计数据。",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": { "200": { "description": "" } },
+        "tags": ["llm"]
+      },
+      "parameters": []
+    },
+    "/token/refresh/": {
+      "post": {
+        "operationId": "token_refresh_create",
+        "description": "Takes a refresh type JSON web token and returns an access type JSON web\ntoken if the refresh token is valid.",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/TokenRefresh" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/TokenRefresh" }
+          }
+        },
+        "tags": ["token"]
+      },
+      "parameters": []
+    },
+    "/users/": {
+      "get": {
+        "operationId": "users_list",
+        "summary": "用户管理API视图集",
+        "description": "提供用户的CRUD操作\n\n端点：\n- GET    /api/users/              # 用户列表（管理员）\n- GET    /api/users/{id}/         # 用户详情（管理员）\n- GET    /api/users/me/           # 当前用户信息\n- PUT    /api/users/me/           # 更新当前用户信息\n- PATCH  /api/users/me/           # 部分更新\n- POST   /api/users/change-password/  # 修改密码\n- POST   /api/users/upload-avatar/    # 上传头像",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/User" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["users"]
+      },
+      "post": {
+        "operationId": "users_create",
+        "summary": "用户管理API视图集",
+        "description": "提供用户的CRUD操作\n\n端点：\n- GET    /api/users/              # 用户列表（管理员）\n- GET    /api/users/{id}/         # 用户详情（管理员）\n- GET    /api/users/me/           # 当前用户信息\n- PUT    /api/users/me/           # 更新当前用户信息\n- PATCH  /api/users/me/           # 部分更新\n- POST   /api/users/change-password/  # 修改密码\n- POST   /api/users/upload-avatar/    # 上传头像",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        },
+        "tags": ["users"]
+      },
+      "parameters": []
+    },
+    "/users/change_password/": {
+      "post": {
+        "operationId": "users_change_password",
+        "summary": "修改密码",
+        "description": "POST /api/users/change-password/\n{\n    \"old_password\": \"OldPass123!\",\n    \"new_password\": \"NewPass123!\",\n    \"new_password_confirm\": \"NewPass123!\"\n}",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        },
+        "tags": ["users"]
+      },
+      "parameters": []
+    },
+    "/users/delete_avatar/": {
+      "delete": {
+        "operationId": "users_delete_avatar",
+        "summary": "删除头像",
+        "description": "DELETE /api/users/delete-avatar/",
+        "parameters": [],
+        "responses": { "204": { "description": "" } },
+        "tags": ["users"]
+      },
+      "parameters": []
+    },
+    "/users/me/": {
+      "get": {
+        "operationId": "users_me",
+        "summary": "获取当前用户信息",
+        "description": "GET /api/users/me/",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "A page number within the paginated result set.",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "required": ["count", "results"],
+              "type": "object",
+              "properties": {
+                "count": { "type": "integer" },
+                "next": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "previous": {
+                  "type": "string",
+                  "format": "uri",
+                  "x-nullable": true
+                },
+                "results": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/User" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["users"]
+      },
+      "parameters": []
+    },
+    "/users/update_me/": {
+      "put": {
+        "operationId": "users_update_me_update",
+        "summary": "更新当前用户信息",
+        "description": "PUT/PATCH /api/users/me/\n{\n    \"first_name\": \"张\",\n    \"last_name\": \"三\",\n    \"phone\": \"13800138000\",\n    \"bio\": \"这是我的个人简介\",\n    \"gender\": \"M\"\n}",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        },
+        "tags": ["users"]
+      },
+      "patch": {
+        "operationId": "users_update_me_partial_update",
+        "summary": "更新当前用户信息",
+        "description": "PUT/PATCH /api/users/me/\n{\n    \"first_name\": \"张\",\n    \"last_name\": \"三\",\n    \"phone\": \"13800138000\",\n    \"bio\": \"这是我的个人简介\",\n    \"gender\": \"M\"\n}",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        },
+        "tags": ["users"]
+      },
+      "parameters": []
+    },
+    "/users/upload_avatar/": {
+      "post": {
+        "operationId": "users_upload_avatar",
+        "summary": "上传头像",
+        "description": "POST /api/users/upload-avatar/\nContent-Type: multipart/form-data\n\nForm Data:\n- avatar: 图片文件",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        },
+        "tags": ["users"]
+      },
+      "parameters": []
+    },
+    "/users/{id}/": {
+      "get": {
+        "operationId": "users_read",
+        "summary": "用户管理API视图集",
+        "description": "提供用户的CRUD操作\n\n端点：\n- GET    /api/users/              # 用户列表（管理员）\n- GET    /api/users/{id}/         # 用户详情（管理员）\n- GET    /api/users/me/           # 当前用户信息\n- PUT    /api/users/me/           # 更新当前用户信息\n- PATCH  /api/users/me/           # 部分更新\n- POST   /api/users/change-password/  # 修改密码\n- POST   /api/users/upload-avatar/    # 上传头像",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        },
+        "tags": ["users"]
+      },
+      "put": {
+        "operationId": "users_update",
+        "summary": "用户管理API视图集",
+        "description": "提供用户的CRUD操作\n\n端点：\n- GET    /api/users/              # 用户列表（管理员）\n- GET    /api/users/{id}/         # 用户详情（管理员）\n- GET    /api/users/me/           # 当前用户信息\n- PUT    /api/users/me/           # 更新当前用户信息\n- PATCH  /api/users/me/           # 部分更新\n- POST   /api/users/change-password/  # 修改密码\n- POST   /api/users/upload-avatar/    # 上传头像",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        },
+        "tags": ["users"]
+      },
+      "patch": {
+        "operationId": "users_partial_update",
+        "summary": "用户管理API视图集",
+        "description": "提供用户的CRUD操作\n\n端点：\n- GET    /api/users/              # 用户列表（管理员）\n- GET    /api/users/{id}/         # 用户详情（管理员）\n- GET    /api/users/me/           # 当前用户信息\n- PUT    /api/users/me/           # 更新当前用户信息\n- PATCH  /api/users/me/           # 部分更新\n- POST   /api/users/change-password/  # 修改密码\n- POST   /api/users/upload-avatar/    # 上传头像",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": { "$ref": "#/definitions/User" }
+          }
+        },
+        "tags": ["users"]
+      },
+      "delete": {
+        "operationId": "users_delete",
+        "summary": "用户管理API视图集",
+        "description": "提供用户的CRUD操作\n\n端点：\n- GET    /api/users/              # 用户列表（管理员）\n- GET    /api/users/{id}/         # 用户详情（管理员）\n- GET    /api/users/me/           # 当前用户信息\n- PUT    /api/users/me/           # 更新当前用户信息\n- PATCH  /api/users/me/           # 部分更新\n- POST   /api/users/change-password/  # 修改密码\n- POST   /api/users/upload-avatar/    # 上传头像",
+        "parameters": [],
+        "responses": { "204": { "description": "" } },
+        "tags": ["users"]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this 用户.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "LLMConfig": {
+      "required": ["name"],
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "name": {
+          "title": "配置名称",
+          "description": "例如：OpenAI配置、本地模型配置",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "provider": {
+          "title": "提供商",
+          "type": "string",
+          "enum": ["openai", "azure", "anthropic", "local", "other"]
+        },
+        "provider_display": {
+          "title": "Provider display",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        },
+        "model_name": {
+          "title": "模型名称",
+          "description": "例如：gpt-3.5-turbo, gpt-4, claude-3-sonnet",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "api_key": {
+          "title": "API密钥",
+          "description": "LLM服务的API密钥",
+          "type": "string",
+          "maxLength": 200
+        },
+        "api_key_masked": {
+          "title": "Api key masked",
+          "type": "string",
+          "readOnly": true
+        },
+        "api_base": {
+          "title": "API基础URL",
+          "description": "可选，用于自定义API端点",
+          "type": "string",
+          "maxLength": 200
+        },
+        "is_active": {
+          "title": "是否启用",
+          "description": "只有启用的配置才会被使用",
+          "type": "boolean"
+        },
+        "max_tokens": {
+          "title": "最大Token数",
+          "description": "单次对话的最大token数量",
+          "type": "integer",
+          "maximum": 9223372036854775807,
+          "minimum": -9223372036854775808
+        },
+        "temperature": {
+          "title": "温度参数",
+          "description": "0-1之间，越高越随机，越低越确定",
+          "type": "number"
+        },
+        "created_at": {
+          "title": "创建时间",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "updated_at": {
+          "title": "更新时间",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      }
+    },
+    "LLMConfigCreate": {
+      "required": ["name"],
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "配置名称",
+          "description": "例如：OpenAI配置、本地模型配置",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "provider": {
+          "title": "提供商",
+          "type": "string",
+          "enum": ["openai", "azure", "anthropic", "local", "other"]
+        },
+        "model_name": {
+          "title": "模型名称",
+          "description": "例如：gpt-3.5-turbo, gpt-4, claude-3-sonnet",
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "api_key": {
+          "title": "API密钥",
+          "description": "LLM服务的API密钥",
+          "type": "string",
+          "maxLength": 200
+        },
+        "api_base": {
+          "title": "API基础URL",
+          "description": "可选，用于自定义API端点",
+          "type": "string",
+          "maxLength": 200
+        },
+        "is_active": {
+          "title": "是否启用",
+          "description": "只有启用的配置才会被使用",
+          "type": "boolean"
+        },
+        "max_tokens": {
+          "title": "最大Token数",
+          "description": "单次对话的最大token数量",
+          "type": "integer",
+          "maximum": 9223372036854775807,
+          "minimum": -9223372036854775808
+        },
+        "temperature": {
+          "title": "温度参数",
+          "description": "0-1之间，越高越随机，越低越确定",
+          "type": "number"
+        }
+      }
+    },
+    "TokenRefresh": {
+      "required": ["refresh"],
+      "type": "object",
+      "properties": {
+        "refresh": { "title": "Refresh", "type": "string", "minLength": 1 },
+        "access": {
+          "title": "Access",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1
+        }
+      }
+    },
+    "UserProfile": {
+      "type": "object",
+      "properties": {
+        "phone": {
+          "title": "手机号",
+          "description": "11位手机号码",
+          "type": "string",
+          "maxLength": 11,
+          "x-nullable": true
+        },
+        "avatar": {
+          "title": "头像",
+          "description": "用户头像图片",
+          "type": "string",
+          "readOnly": true,
+          "x-nullable": true,
+          "format": "uri"
+        },
+        "avatar_url": {
+          "title": "Avatar url",
+          "type": "string",
+          "readOnly": true
+        },
+        "bio": {
+          "title": "个人简介",
+          "description": "个人简介，最多500字符",
+          "type": "string",
+          "maxLength": 500
+        },
+        "birth_date": {
+          "title": "出生日期",
+          "type": "string",
+          "format": "date",
+          "x-nullable": true
+        },
+        "gender": {
+          "title": "性别",
+          "type": "string",
+          "enum": ["M", "F", "O"]
+        },
+        "email_verified": {
+          "title": "邮箱已验证",
+          "description": "邮箱是否已通过验证",
+          "type": "boolean",
+          "readOnly": true
+        },
+        "phone_verified": {
+          "title": "手机已验证",
+          "description": "手机号是否已通过验证",
+          "type": "boolean",
+          "readOnly": true
+        },
+        "login_count": {
+          "title": "登录次数",
+          "description": "用户累计登录次数",
+          "type": "integer",
+          "readOnly": true
+        },
+        "last_login_ip": {
+          "title": "最后登录IP",
+          "description": "用户最后一次登录的IP地址",
+          "type": "string",
+          "readOnly": true,
+          "minLength": 1,
+          "x-nullable": true
+        },
+        "created_at": {
+          "title": "创建时间",
+          "description": "记录创建时间",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "updated_at": {
+          "title": "更新时间",
+          "description": "记录最后更新时间",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "age": { "title": "Age", "type": "string", "readOnly": true }
+      }
+    },
+    "User": {
+      "required": ["username"],
+      "type": "object",
+      "properties": {
+        "id": { "title": "ID", "type": "integer", "readOnly": true },
+        "username": {
+          "title": "用户名",
+          "description": "必填；长度为150个字符或以下；只能包含字母、数字、特殊字符“@”、“.”、“-”和“_”。",
+          "type": "string",
+          "pattern": "^[\\w.@+-]+$",
+          "maxLength": 150,
+          "minLength": 1
+        },
+        "email": {
+          "title": "电子邮件地址",
+          "type": "string",
+          "format": "email",
+          "maxLength": 254
+        },
+        "first_name": { "title": "名字", "type": "string", "maxLength": 150 },
+        "last_name": { "title": "姓氏", "type": "string", "maxLength": 150 },
+        "full_name": {
+          "title": "Full name",
+          "type": "string",
+          "readOnly": true
+        },
+        "is_active": {
+          "title": "有效",
+          "description": "指明用户是否被认为是活跃的。以反选代替删除帐号。",
+          "type": "boolean"
+        },
+        "is_staff": {
+          "title": "工作人员状态",
+          "description": "指明用户是否可以登录到这个管理站点。",
+          "type": "boolean",
+          "readOnly": true
+        },
+        "date_joined": {
+          "title": "加入日期",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "last_login": {
+          "title": "上次登录",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true,
+          "x-nullable": true
+        },
+        "profile": { "$ref": "#/definitions/UserProfile" }
+      }
+    }
+  }
+}

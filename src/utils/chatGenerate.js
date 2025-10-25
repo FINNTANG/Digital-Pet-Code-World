@@ -1,41 +1,78 @@
-async function chatMessage(health, mood, message, petType) {
+import { chat } from '../api/chat';
+
+/**
+ * 生成宠物聊天消息
+ *
+ * 调用后端 chat API，将绝对状态值转换为变化量(delta)
+ *
+ * @param {number} health - 宠物当前健康值 (0-100)
+ * @param {number} happiness - 宠物当前快乐值 (0-100)
+ * @param {string} message - 用户消息
+ * @param {string} petType - 宠物类型 (fox/dog/snake)
+ * @param {string} [imageData] - Base64编码的图片数据（可选）
+ *
+ * @returns {Promise<Object>} 返回聊天响应
+ * @returns {boolean} return.result - 是否成功
+ * @returns {string} return.message - 宠物的回复消息
+ * @returns {string[]} return.options - 用户可选的回复选项数组
+ * @returns {number} return.health - 健康值变化量 (delta, 可正可负)
+ * @returns {number} return.mood - 快乐值变化量 (delta, 可正可负)
+ */
+async function chatMessage(
+  health,
+  happiness,
+  message,
+  petType,
+  imageData = null,
+) {
   try {
-    const response = await fetch('https://chat-gpt-4-turbo1.p.rapidapi.com/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-rapidapi-key': '031b5df5d1mshe7a3df6102728cep144387jsnc2ed3ac026e6',
-        'x-rapidapi-host': 'chat-gpt-4-turbo1.p.rapidapi.com',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4-turbo-preview',
-        max_tokens: 1000,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: `You are a ${petType} virtual pet who loves to interact with your owner in a witty and humorous way. If you are a dog, you are loyal, energetic and playful. If you are a fox, you are clever, mischievous and witty. If you are a snake, you are smooth-talking, mysterious and charming. You have two important attributes: mood and health. Both your mood and health will influence your behavior. Currently, your mood index is${mood}，The health index is${health}。You need to provide appropriate responses based on your current mood and health status, as well as the user's question, and offer three options for the user to choose from (described in the first person). The specific format is as follows：{result: true,  message: Response content,  options: [Option 1, Option 2, Option 3], health: Health fluctuates (positive or negative) based on interactions with the owner, mood: Mood fluctuates (positive or negative) based on interactions with the owner}，Note：The response data should be in standard JSON format，The options you provide should be described in the first person, from the user's perspective, and the response must be fewer than 10 words.`,
-              },
-              {
-                type: 'text',
-                text: message,
-              },
-            ],
-          },
-        ],
-      }),
-    });
+    // 生成或获取会话ID（可以从localStorage获取或生成新的）
+    let sessionId = localStorage.getItem('chat_session_id');
+    if (!sessionId) {
+      sessionId = `session_${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+      localStorage.setItem('chat_session_id', sessionId);
+    }
 
-    const data = await response.json();
-    let content = data.choices[0].message.content;
-    // 移除 ```json 和 ``` 标记
-    content = content.replace(/```json\s*/, '').replace(/```\s*$/, '');
+    // 构建请求数据
+    const requestData = {
+      message: message,
+      session_id: sessionId,
+      pet_type: petType,
+      health: Math.round(health),
+      happiness: Math.round(happiness),
+    };
 
-    // 解析清理后的 JSON
-    const parsedContent = JSON.parse(content);
-    return parsedContent;
+    // 如果有图片数据，添加到请求中
+    if (imageData) {
+      requestData.image_data = imageData;
+    }
+
+    // 调用聊天 API
+    const response = await chat(requestData);
+
+    // 检查响应格式
+    if (response && response.status === 'success' && response.data.result) {
+      // API 返回的是更新后的绝对状态值 (0-100)
+      // response.data.health: 更新后的健康值
+      // response.data.mood: 更新后的快乐值
+      // 我们需要计算变化量(delta)，供调用方更新宠物状态
+
+      // 返回标准格式的响应（health和mood是变化量，不是绝对值）
+
+      return {
+        result: true,
+        message: response.data.ai_response || '',
+        options: response.data.options || [],
+        health: response.data.health, // 健康值变化量
+        mood: response.data.mood, // 快乐值变化量
+      };
+    }
+
+    // 如果响应格式不符合预期，返回失败
+    console.error('聊天 API 响应格式不正确:', response);
+    return { result: false };
   } catch (error) {
     console.error('对话生成失败:', error);
     return { result: false };
