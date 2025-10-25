@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import petState from '../utils/petState.jsx';
 import { getRandomDialogue } from '../utils/dialogueSystem.jsx';
-import analyzeImage from '../utils/imageAnalysis.js';
+import { chat } from '../api/chat.js';
 import chatMessage from '../utils/chatGenerate.js';
 import '../styles/Pet.css';
 import { HintWindow } from './ui/hint';
@@ -188,7 +188,7 @@ Have fun with your new digital friend! ✨`;
         // 确保只在有有效的精灵时更新
         setCurrentSprite(newSprite);
       }
-    }, 3000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, [petType]);
@@ -291,25 +291,45 @@ Have fun with your new digital friend! ✨`;
         });
         setShowAnalysis(true);
 
-        const result = await analyzeImage(imageData, petType);
+        // 保存当前状态用于计算变化量
+        const currentHealth = petState.health;
+        const currentHappiness = petState.happiness;
+
+        // 使用 chat API 替换 analyzeImage
+        const response = await chat({
+          message: 'Analyze this image and tell me what you see',
+          session_id: 'feed_session',
+          pet_type: petType,
+          health: currentHealth,
+          happiness: currentHappiness,
+          image_data: imageData,
+        });
 
         clearTimeout(apiTimeoutRef.current);
 
+        console.log(response, 'response');
+
+        // 适配 chat API 的返回格式为 analyzeImage 格式
+        const result = {
+          result: response.status === 'success' && response.data?.result,
+          name: response.data?.ai_response || 'Unknown item',
+          isLike: response.data?.mood >= currentHappiness,
+          reason: response.data?.ai_response || '',
+          healthEffect:
+            (response.data?.health || currentHealth) - currentHealth,
+          moodEffect:
+            (response.data?.mood || currentHappiness) - currentHappiness,
+        };
+
         if (result.result) {
-          // 更新宠物状态
-          petState.health = Math.min(
-            100,
-            Math.max(0, petState.health + result.healthEffect),
-          );
-          petState.happiness = Math.min(
-            100,
-            Math.max(0, petState.happiness + result.moodEffect),
-          );
+          // 更新宠物状态（使用 API 返回的新值）
+          petState.health = Math.min(100, Math.max(0, response.data.health));
+          petState.happiness = Math.min(100, Math.max(0, response.data.mood));
           setStatus(petState.state);
 
           // 构建分析结果消息
           const analysisText = [
-            `<div class="analysis-line text-white">Content: ${result.name}</div>`, // 将内容设为白色
+            `<div class="text-white analysis-line">Content: ${result.name}</div>`,
             `<div class="analysis-line ${
               result.isLike ? 'text-green-500' : 'text-red-500'
             }">Status: ${
@@ -425,7 +445,10 @@ Have fun with your new digital friend! ✨`;
 
       if (response.result) {
         // 设置对话内容和选项
-        setDialogue(response.options);
+        setDialogue({
+          message: response.message,
+          options: response.options,
+        });
         typeMessage(response.message);
 
         // 更新宠物状态（response.health和response.mood是变化量）
@@ -919,7 +942,7 @@ Have fun with your new digital friend! ✨`;
       </div>
 
       {/* 宠物显示框 */}
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex justify-center items-center min-h-screen">
         <div className="pet-window">
           <div className="window-toolbar">
             <span className="window-title">{getPetTitle()}</span>
@@ -951,7 +974,7 @@ Have fun with your new digital friend! ✨`;
       </div>
 
       {/* 控制按钮 */}
-      <div className="absolute flex gap-4 transform -translate-x-1/2 bottom-8 left-1/2">
+      <div className="flex absolute bottom-8 left-1/2 gap-4 transform -translate-x-1/2">
         <button
           className="control-button feed-button"
           onClick={() => {
@@ -989,7 +1012,7 @@ Have fun with your new digital friend! ✨`;
       </div>
 
       {/* 音频控制按钮 */}
-      <div className="absolute bottom-4 right-4">
+      <div className="absolute right-4 bottom-4">
         <button
           className={`sound-toggle ${soundEnabled ? 'on' : 'off'}`}
           onClick={toggleSound}
@@ -1073,8 +1096,6 @@ Have fun with your new digital friend! ✨`;
                 displayedMessage
               )}
             </div>
-            <div>111{dialogue.options}</div>
-            <div>{isWaitingResponse}</div>
             {dialogue && dialogue.options && !isWaitingResponse && (
               <div className="chat-options">
                 {dialogue.options.map((option, index) => (
