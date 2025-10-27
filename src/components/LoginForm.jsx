@@ -1,6 +1,60 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { loginFlow, registerFlow } from '../api/auth';
+
+// 错误弹窗组件
+const ErrorModal = ({ message, onClose }) => {
+  if (!message) return null;
+  
+  return (
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
+      onClick={onClose}
+    >
+      <div 
+        className="border-2 border-red-500 p-6 max-w-md w-full mx-4"
+        style={{
+          backgroundColor: 'rgba(0, 0, 0, 0.95)',
+          boxShadow: '0 0 30px rgba(255, 0, 0, 0.5)',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="text-center space-y-4">
+          <PixelText style={{ 
+            fontSize: '28px', 
+            color: '#ff0000',
+            textShadow: '0 0 5px #ff0000, 0 0 10px #ff0000'
+          }}>
+            ERROR
+          </PixelText>
+          
+          <PixelText style={{ 
+            fontSize: '20px', 
+            color: '#ff6666',
+            textShadow: '0 0 3px #ff0000'
+          }}>
+            {message}
+          </PixelText>
+          
+          <button
+            onClick={onClose}
+            className="w-full px-6 py-3 bg-transparent border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-black transition-all duration-300 mt-4"
+            style={{
+              fontFamily: "'VT323', monospace",
+              fontSize: '22px',
+              letterSpacing: '2px',
+              fontWeight: '700',
+              boxShadow: '0 0 8px #ff0000',
+            }}
+          >
+            CLOSE
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Matrix Rain背景组件
 const MatrixRain = () => {
@@ -105,6 +159,7 @@ const PixelText = ({ children, className = '', style = {} }) => (
 
 const LoginForm = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [mode, setMode] = useState('login'); // 'login' or 'register'
   const [formData, setFormData] = useState({
     username: '',
@@ -114,7 +169,12 @@ const LoginForm = () => {
     phone: ''
   });
   const [error, setError] = useState('');
+  const [modalError, setModalError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
+  
+  // 获取登录前尝试访问的页面
+  const from = location.state?.from || '/';
 
   const handleChange = (e) => {
     setFormData({
@@ -127,6 +187,7 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setModalError('');
     setLoading(true);
 
     try {
@@ -139,12 +200,19 @@ const LoginForm = () => {
         console.log('登录成功:', user);
         // 保存用户信息
         localStorage.setItem('user_info', JSON.stringify(user));
-        // 跳转到首页
-        navigate('/');
+        // 清除游客模式标记
+        localStorage.removeItem('guest_mode');
+        // 跳转到之前的页面或首页
+        navigate(from, { replace: true });
       } else {
         // 注册
         if (formData.password !== formData.password_confirm) {
-          setError('两次输入的密码不一致');
+          setModalError('两次输入的密码不一致');
+          setLoading(false);
+          return;
+        }
+        if (!agreedToPrivacy) {
+          setModalError('请阅读并同意隐私政策后继续');
           setLoading(false);
           return;
         }
@@ -158,12 +226,15 @@ const LoginForm = () => {
         console.log('注册成功:', user);
         // 保存用户信息
         localStorage.setItem('user_info', JSON.stringify(user));
-        // 跳转到首页
-        navigate('/');
+        // 清除游客模式标记
+        localStorage.removeItem('guest_mode');
+        // 跳转到之前的页面或首页
+        navigate(from, { replace: true });
       }
     } catch (err) {
       console.error('认证失败:', err);
-      setError(err.response?.data?.message || err.message || '操作失败，请重试');
+      const errorMessage = err.response?.data?.message || err.message || '操作失败，请重试';
+      setModalError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -172,12 +243,14 @@ const LoginForm = () => {
   const handleGuestMode = () => {
     // 设置游客标记
     localStorage.setItem('guest_mode', 'true');
-    navigate('/');
+    // 跳转到之前的页面或首页
+    navigate(from, { replace: true });
   };
 
   const switchMode = () => {
     setMode(mode === 'login' ? 'register' : 'login');
     setError('');
+    setAgreedToPrivacy(false);
     setFormData({
       username: '',
       email: '',
@@ -311,17 +384,18 @@ const LoginForm = () => {
               </div>
             )}
 
-            {/* 手机号（仅注册时显示，可选） */}
+            {/* 手机号（仅注册时显示，必填） */}
             {mode === 'register' && (
               <div>
                 <PixelText style={{ fontSize: '18px', marginBottom: '8px' }}>
-                  PHONE (OPTIONAL)
+                  PHONE
                 </PixelText>
                 <input
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
+                  required
                   className="w-full bg-black border-2 border-green-500 text-green-500 px-4 py-2 focus:outline-none"
                   style={{
                     fontFamily: "'VT323', monospace",
@@ -335,28 +409,63 @@ const LoginForm = () => {
               </div>
             )}
 
-            {/* 错误信息 */}
-            {error && (
-              <div 
-                className="border-2 border-red-500 p-3"
-                style={{
-                  backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                }}
-              >
-                <PixelText style={{ 
-                  fontSize: '16px', 
-                  color: '#ff0000',
-                  textShadow: '0 0 3px #ff0000, 0 0 6px #ff0000'
-                }}>
-                  ERROR: {error}
-                </PixelText>
+            {/* 隐私政策同意（仅注册时显示） */}
+            {mode === 'register' && (
+              <div className="flex items-start space-x-3 pt-2">
+                <input
+                  type="checkbox"
+                  id="privacyAgreement"
+                  checked={agreedToPrivacy}
+                  onChange={(e) => setAgreedToPrivacy(e.target.checked)}
+                  className="mt-1 w-5 h-5 bg-black border-2 border-green-500 cursor-pointer"
+                  style={{
+                    accentColor: '#00ff00',
+                    filter: 'hue-rotate(0deg) saturate(2)',
+                  }}
+                />
+                <label 
+                  htmlFor="privacyAgreement" 
+                  className="flex-1 cursor-pointer"
+                >
+                  <PixelText style={{ fontSize: '16px', lineHeight: '1.6' }}>
+                    我已阅读并同意{' '}
+                    <a
+                      href="/privacy-policy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline hover:text-white transition-colors"
+                      style={{
+                        textDecoration: 'underline',
+                        textShadow: '0 0 5px #00ff00, 0 0 10px #00ff00',
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      《隐私政策》
+                    </a>
+                  </PixelText>
+                  <PixelText style={{ fontSize: '14px', opacity: 0.7, marginTop: '5px' }}>
+                    I have read and agree to the{' '}
+                    <a
+                      href="/privacy-policy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline hover:text-white transition-colors"
+                      style={{
+                        textDecoration: 'underline',
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Privacy Policy
+                    </a>
+                  </PixelText>
+                </label>
               </div>
             )}
 
             {/* 提交按钮 */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || (mode === 'register' && !agreedToPrivacy)}
               className="w-full px-6 py-3 bg-transparent border-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-black transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 fontFamily: "'VT323', monospace",
@@ -408,6 +517,12 @@ const LoginForm = () => {
           </PixelText>
         </div>
       </div>
+
+      {/* 错误弹窗 */}
+      <ErrorModal 
+        message={modalError} 
+        onClose={() => setModalError('')} 
+      />
     </div>
   );
 };

@@ -95,6 +95,8 @@ const DigitalPet = () => {
   const [isApiCalling, setIsApiCalling] = useState(false);
   const apiTimeoutRef = useRef(null);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [userInput, setUserInput] = useState('');
+  const inputRef = useRef(null);
 
   // 从 petState 获取用户选择的宠物类型
   const [petType, setPetType] = useState(() => {
@@ -335,7 +337,6 @@ Have fun with your new digital friend! ✨`;
             }">Status: ${
               result.isLike ? 'I like it!' : "I don't like it..."
             }</div>`,
-            `<div class="analysis-line">Reason: ${result.reason}</div>`,
             `<div class="analysis-line">Effects:</div>`,
             `<div class="analysis-line ${
               result.moodEffect >= 0 ? 'text-green-500' : 'text-red-500'
@@ -391,6 +392,7 @@ Have fun with your new digital friend! ✨`;
 
   const handleChat = () => {
     setShowChat(true);
+    setUserInput(''); // 重置输入框
 
     // 根据不同宠物类型生成不同的初始对话
     let initialMessage;
@@ -421,11 +423,31 @@ Have fun with your new digital friend! ✨`;
     typeMessage(initialDialogue.message);
   };
 
+  // 处理用户自定义输入的发送
+  const handleSendMessage = () => {
+    const message = userInput.trim();
+    if (message && !isWaitingResponse) {
+      handleResponse(message);
+    }
+  };
+
+  // 处理回车键发送
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
   const handleResponse = async (option) => {
     if (isWaitingResponse) return;
+    
+    // 如果是空输入，不处理
+    if (!option || option.trim() === '') return;
 
     setIsWaitingResponse(true);
     setDisplayedMessage('Thinking about your message');
+    setUserInput(''); // 清空输入框
 
     try {
       // 调用 chatMessage，它返回：
@@ -1109,6 +1131,26 @@ Have fun with your new digital friend! ✨`;
                 ))}
               </div>
             )}
+            {/* 用户输入区域 */}
+            <div className="chat-input-container">
+              <input
+                ref={inputRef}
+                type="text"
+                className="chat-input"
+                placeholder="Type your message or choose above..."
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                disabled={isWaitingResponse}
+              />
+              <button
+                className="chat-send-button"
+                onClick={handleSendMessage}
+                disabled={isWaitingResponse || !userInput.trim()}
+              >
+                SEND
+              </button>
+            </div>
           </div>
         </div>
       )}
