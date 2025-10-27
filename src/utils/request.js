@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // ==================== 配置常量 ====================
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+const API_BASE_URL = 'https://pet-api.plusdoit.com/api';
+// const API_BASE_URL =  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 const TOKEN_KEY = 'access_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
 
@@ -17,41 +18,44 @@ export const tokenManager = {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
   },
-  hasToken: () => !!localStorage.getItem(TOKEN_KEY)
+  hasToken: () => !!localStorage.getItem(TOKEN_KEY),
 };
 
 // ==================== Axios 实例创建 ====================
 const request = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000,
+  timeout: 100000,
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+  },
 });
 
 // ==================== 请求拦截器 ====================
 request.interceptors.request.use(
-  config => {
+  (config) => {
     // 自动添加 Authorization header
     const token = tokenManager.getAccessToken();
     if (token && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     // 打印请求日志（开发环境）
     if (import.meta.env.DEV) {
-      console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, {
-        params: config.params,
-        data: config.data
-      });
+      console.log(
+        `[API Request] ${config.method?.toUpperCase()} ${config.url}`,
+        {
+          params: config.params,
+          data: config.data,
+        },
+      );
     }
-    
+
     return config;
   },
-  error => {
+  (error) => {
     console.error('[Request Error]', error);
     return Promise.reject(error);
-  }
+  },
 );
 
 // ==================== 响应拦截器 ====================
@@ -65,102 +69,106 @@ const subscribeTokenRefresh = (callback) => {
 
 // 通知所有订阅者 token 刷新完成
 const onTokenRefreshed = (token) => {
-  refreshSubscribers.forEach(callback => callback(token));
+  refreshSubscribers.forEach((callback) => callback(token));
   refreshSubscribers = [];
 };
 
 request.interceptors.response.use(
-  response => {
+  (response) => {
     // 打印响应日志（开发环境）
     if (import.meta.env.DEV) {
       console.log(`[API Response] ${response.config.url}`, response.data);
     }
-    
+
     // 统一响应格式处理
     return response.data;
   },
-  async error => {
+  async (error) => {
     const originalRequest = error.config;
-    
+
     // 处理 401 未授权错误 - 尝试刷新 token
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         // 如果正在刷新，则等待刷新完成
-        return new Promise(resolve => {
-          subscribeTokenRefresh(token => {
+        return new Promise((resolve) => {
+          subscribeTokenRefresh((token) => {
             originalRequest.headers.Authorization = `Bearer ${token}`;
             resolve(request(originalRequest));
           });
         });
       }
-      
+
       originalRequest._retry = true;
       isRefreshing = true;
-      
+
       const refreshToken = tokenManager.getRefreshToken();
-      
+
       if (refreshToken) {
         try {
           // 调用刷新 token 接口
-          const response = await axios.post(
-            `${API_BASE_URL}/token/refresh/`,
-            { refresh: refreshToken }
-          );
-          
+          const response = await axios.post(`${API_BASE_URL}/token/refresh/`, {
+            refresh: refreshToken,
+          });
+
           const newAccessToken = response.data.access;
           tokenManager.setTokens(newAccessToken, refreshToken);
-          
+
           // 更新请求头
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          
+
           // 通知所有等待的请求
           onTokenRefreshed(newAccessToken);
           isRefreshing = false;
-          
+
           // 重试原始请求
           return request(originalRequest);
         } catch (refreshError) {
           // 刷新失败，清除 token 并跳转登录
           isRefreshing = false;
           tokenManager.clearTokens();
-          
+
           // 触发全局登出事件
-          window.dispatchEvent(new CustomEvent('auth:logout', { 
-            detail: { reason: 'token_refresh_failed' }
-          }));
-          
+          window.dispatchEvent(
+            new CustomEvent('auth:logout', {
+              detail: { reason: 'token_refresh_failed' },
+            }),
+          );
+
           return Promise.reject(refreshError);
         }
       } else {
         // 没有 refresh token，直接跳转登录
         tokenManager.clearTokens();
-        window.dispatchEvent(new CustomEvent('auth:logout', { 
-          detail: { reason: 'no_refresh_token' }
-        }));
+        window.dispatchEvent(
+          new CustomEvent('auth:logout', {
+            detail: { reason: 'no_refresh_token' },
+          }),
+        );
       }
     }
-    
+
     // 统一错误处理
-    const errorMessage = error.response?.data?.message 
-      || error.response?.data?.detail
-      || error.response?.data?.error
-      || error.message 
-      || '请求失败';
-    
+    const errorMessage =
+      error.response?.data?.message ||
+      error.response?.data?.detail ||
+      error.response?.data?.error ||
+      error.message ||
+      '请求失败';
+
     console.error('[API Error]', {
       url: error.config?.url,
       status: error.response?.status,
       message: errorMessage,
-      data: error.response?.data
+      data: error.response?.data,
     });
-    
+
     return Promise.reject({
       status: error.response?.status,
       message: errorMessage,
       data: error.response?.data,
-      originalError: error
+      originalError: error,
     });
-  }
+  },
 );
 
 // ==================== API 模块 ====================
@@ -177,7 +185,7 @@ export const authAPI = {
    * @returns {Promise}
    */
   login: (data) => request.post('/auth/login/', data),
-  
+
   /**
    * 用户注册
    * @param {Object} data - 注册信息
@@ -189,12 +197,12 @@ export const authAPI = {
    * @returns {Promise}
    */
   register: (data) => request.post('/auth/register/', data),
-  
+
   /**
    * 用户登出
    * @returns {Promise}
    */
-  logout: () => request.post('/auth/logout/')
+  logout: () => request.post('/auth/logout/'),
 };
 
 /**
@@ -206,9 +214,10 @@ export const tokenAPI = {
    * @param {string} refreshToken - refresh token
    * @returns {Promise}
    */
-  refresh: (refreshToken) => request.post('/token/refresh/', { 
-    refresh: refreshToken 
-  })
+  refresh: (refreshToken) =>
+    request.post('/token/refresh/', {
+      refresh: refreshToken,
+    }),
 };
 
 /**
@@ -224,21 +233,21 @@ export const userAPI = {
    * @returns {Promise}
    */
   getList: (params) => request.get('/users/', { params }),
-  
+
   /**
    * 创建用户（管理员）
    * @param {Object} data - 用户信息
    * @returns {Promise}
    */
   create: (data) => request.post('/users/', data),
-  
+
   /**
    * 获取用户详情（管理员）
    * @param {number} id - 用户ID
    * @returns {Promise}
    */
   getDetail: (id) => request.get(`/users/${id}/`),
-  
+
   /**
    * 更新用户（管理员）
    * @param {number} id - 用户ID
@@ -246,7 +255,7 @@ export const userAPI = {
    * @returns {Promise}
    */
   update: (id, data) => request.put(`/users/${id}/`, data),
-  
+
   /**
    * 部分更新用户（管理员）
    * @param {number} id - 用户ID
@@ -254,20 +263,20 @@ export const userAPI = {
    * @returns {Promise}
    */
   partialUpdate: (id, data) => request.patch(`/users/${id}/`, data),
-  
+
   /**
    * 删除用户（管理员）
    * @param {number} id - 用户ID
    * @returns {Promise}
    */
   delete: (id) => request.delete(`/users/${id}/`),
-  
+
   /**
    * 获取当前用户信息
    * @returns {Promise}
    */
   getMe: () => request.get('/users/me/'),
-  
+
   /**
    * 更新当前用户信息
    * @param {Object} data - 用户信息
@@ -280,14 +289,14 @@ export const userAPI = {
    * @returns {Promise}
    */
   updateMe: (data) => request.put('/users/update_me/', data),
-  
+
   /**
    * 部分更新当前用户信息
    * @param {Object} data - 用户信息
    * @returns {Promise}
    */
   patchMe: (data) => request.patch('/users/update_me/', data),
-  
+
   /**
    * 修改密码
    * @param {Object} data - 密码信息
@@ -297,7 +306,7 @@ export const userAPI = {
    * @returns {Promise}
    */
   changePassword: (data) => request.post('/users/change_password/', data),
-  
+
   /**
    * 上传头像
    * @param {File} file - 头像文件
@@ -307,15 +316,15 @@ export const userAPI = {
     const formData = new FormData();
     formData.append('avatar', file);
     return request.post('/users/upload_avatar/', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
-  
+
   /**
    * 删除头像
    * @returns {Promise}
    */
-  deleteAvatar: () => request.delete('/users/delete_avatar/')
+  deleteAvatar: () => request.delete('/users/delete_avatar/'),
 };
 
 /**
@@ -330,7 +339,7 @@ export const llmAPI = {
    * @returns {Promise}
    */
   chat: (data) => request.post('/llm/chat/', data),
-  
+
   /**
    * 获取消息历史
    * @param {Object} params - 查询参数
@@ -342,7 +351,7 @@ export const llmAPI = {
    * @returns {Promise}
    */
   getMessages: (params) => request.get('/llm/messages/', { params }),
-  
+
   /**
    * 获取会话列表
    * @param {Object} params - 查询参数
@@ -352,27 +361,28 @@ export const llmAPI = {
    * @returns {Promise}
    */
   getSessions: (params) => request.get('/llm/sessions/', { params }),
-  
+
   /**
    * 删除指定会话
    * @param {string} sessionId - 会话ID
    * @returns {Promise}
    */
   deleteSession: (sessionId) => request.delete(`/llm/sessions/${sessionId}/`),
-  
+
   /**
    * 清空指定会话
    * @param {string} sessionId - 会话ID
    * @returns {Promise}
    */
-  clearSession: (sessionId) => request.post(`/llm/sessions/${sessionId}/clear/`),
-  
+  clearSession: (sessionId) =>
+    request.post(`/llm/sessions/${sessionId}/clear/`),
+
   /**
    * 获取聊天统计信息
    * @param {Object} params - 查询参数
    * @returns {Promise}
    */
-  getStatistics: (params) => request.get('/llm/statistics/', { params })
+  getStatistics: (params) => request.get('/llm/statistics/', { params }),
 };
 
 /**
@@ -388,7 +398,7 @@ export const llmConfigAPI = {
    * @returns {Promise}
    */
   getList: (params) => request.get('/llm-configs/', { params }),
-  
+
   /**
    * 创建配置
    * @param {Object} data - 配置信息
@@ -403,14 +413,14 @@ export const llmConfigAPI = {
    * @returns {Promise}
    */
   create: (data) => request.post('/llm-configs/', data),
-  
+
   /**
    * 获取配置详情
    * @param {number} id - 配置ID
    * @returns {Promise}
    */
   getDetail: (id) => request.get(`/llm-configs/${id}/`),
-  
+
   /**
    * 更新配置
    * @param {number} id - 配置ID
@@ -418,7 +428,7 @@ export const llmConfigAPI = {
    * @returns {Promise}
    */
   update: (id, data) => request.put(`/llm-configs/${id}/`, data),
-  
+
   /**
    * 部分更新配置
    * @param {number} id - 配置ID
@@ -426,27 +436,27 @@ export const llmConfigAPI = {
    * @returns {Promise}
    */
   partialUpdate: (id, data) => request.patch(`/llm-configs/${id}/`, data),
-  
+
   /**
    * 删除配置
    * @param {number} id - 配置ID
    * @returns {Promise}
    */
   delete: (id) => request.delete(`/llm-configs/${id}/`),
-  
+
   /**
    * 激活指定配置
    * @param {number} id - 配置ID
    * @returns {Promise}
    */
   activate: (id) => request.post(`/llm-configs/${id}/activate/`),
-  
+
   /**
    * 禁用指定配置
    * @param {number} id - 配置ID
    * @returns {Promise}
    */
-  deactivate: (id) => request.post(`/llm-configs/${id}/deactivate/`)
+  deactivate: (id) => request.post(`/llm-configs/${id}/deactivate/`),
 };
 
 // ==================== 工具函数 ====================
@@ -462,7 +472,7 @@ export const buildPageParams = (page = 1, pageSize = 10, otherParams = {}) => {
   return {
     page,
     page_size: pageSize,
-    ...otherParams
+    ...otherParams,
   };
 };
 
@@ -474,9 +484,9 @@ export const buildPageParams = (page = 1, pageSize = 10, otherParams = {}) => {
 export const downloadFile = async (url, filename) => {
   try {
     const response = await request.get(url, {
-      responseType: 'blob'
+      responseType: 'blob',
     });
-    
+
     const blob = new Blob([response]);
     const link = document.createElement('a');
     link.href = window.URL.createObjectURL(blob);
@@ -500,21 +510,21 @@ export const downloadFile = async (url, filename) => {
 export const uploadFile = (url, file, additionalData = {}, onProgress) => {
   const formData = new FormData();
   formData.append('file', file);
-  
-  Object.keys(additionalData).forEach(key => {
+
+  Object.keys(additionalData).forEach((key) => {
     formData.append(key, additionalData[key]);
   });
-  
+
   return request.post(url, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress: (progressEvent) => {
       if (onProgress && progressEvent.total) {
         const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
+          (progressEvent.loaded * 100) / progressEvent.total,
         );
         onProgress(percentCompleted);
       }
-    }
+    },
   });
 };
 
