@@ -141,13 +141,120 @@ body::after,
   image-rendering: pixelated;
 }
 
-/* Health 图标样式 */
+/* Health 图标样式 - 像素风格心形 */
 .health-icon::before {
-  content: '♥';
-  font-size: 42px;
-  color: rgb(255, 0, 0);
-  transform: scale(1.2) translateY(-4px);
+  content: '';
   display: block;
+  width: 4px;
+  height: 4px;
+  position: relative;
+  background: rgb(255, 0, 0);
+  box-shadow: 
+    /* 第1行：  ███   ███ */
+    4px 0 0 0 rgb(255, 0, 0),
+    8px 0 0 0 rgb(255, 0, 0),
+    16px 0 0 0 rgb(255, 0, 0),
+    20px 0 0 0 rgb(255, 0, 0),
+    24px 0 0 0 rgb(255, 0, 0),
+    
+    /* 第2行：█████ █████ */
+    -4px 4px 0 0 rgb(255, 0, 0),
+    0 4px 0 0 rgb(255, 0, 0),
+    4px 4px 0 0 rgb(255, 0, 0),
+    8px 4px 0 0 rgb(255, 0, 0),
+    12px 4px 0 0 rgb(255, 0, 0),
+    16px 4px 0 0 rgb(255, 0, 0),
+    20px 4px 0 0 rgb(255, 0, 0),
+    24px 4px 0 0 rgb(255, 0, 0),
+    28px 4px 0 0 rgb(255, 0, 0),
+    
+    /* 第3行：███████████████ */
+    -8px 8px 0 0 rgb(255, 0, 0),
+    -4px 8px 0 0 rgb(255, 0, 0),
+    0 8px 0 0 rgb(255, 0, 0),
+    4px 8px 0 0 rgb(255, 0, 0),
+    8px 8px 0 0 rgb(255, 0, 0),
+    12px 8px 0 0 rgb(255, 0, 0),
+    16px 8px 0 0 rgb(255, 0, 0),
+    20px 8px 0 0 rgb(255, 0, 0),
+    24px 8px 0 0 rgb(255, 0, 0),
+    28px 8px 0 0 rgb(255, 0, 0),
+    32px 8px 0 0 rgb(255, 0, 0),
+    
+    /* 第4行：███████████████ */
+    -8px 12px 0 0 rgb(255, 0, 0),
+    -4px 12px 0 0 rgb(255, 0, 0),
+    0 12px 0 0 rgb(255, 0, 0),
+    4px 12px 0 0 rgb(255, 0, 0),
+    8px 12px 0 0 rgb(255, 0, 0),
+    12px 12px 0 0 rgb(255, 0, 0),
+    16px 12px 0 0 rgb(255, 0, 0),
+    20px 12px 0 0 rgb(255, 0, 0),
+    24px 12px 0 0 rgb(255, 0, 0),
+    28px 12px 0 0 rgb(255, 0, 0),
+    32px 12px 0 0 rgb(255, 0, 0),
+    
+    /* 第5行： █████████████ */
+    -4px 16px 0 0 rgb(255, 0, 0),
+    0 16px 0 0 rgb(255, 0, 0),
+    4px 16px 0 0 rgb(255, 0, 0),
+    8px 16px 0 0 rgb(255, 0, 0),
+    12px 16px 0 0 rgb(255, 0, 0),
+    16px 16px 0 0 rgb(255, 0, 0),
+    20px 16px 0 0 rgb(255, 0, 0),
+    24px 16px 0 0 rgb(255, 0, 0),
+    28px 16px 0 0 rgb(255, 0, 0),
+    
+    /* 第6行：  ███████████ */
+    0 20px 0 0 rgb(255, 0, 0),
+    4px 20px 0 0 rgb(255, 0, 0),
+    8px 20px 0 0 rgb(255, 0, 0),
+    12px 20px 0 0 rgb(255, 0, 0),
+    16px 20px 0 0 rgb(255, 0, 0),
+    20px 20px 0 0 rgb(255, 0, 0),
+    24px 20px 0 0 rgb(255, 0, 0),
+    
+    /* 第7行：   █████████ */
+    4px 24px 0 0 rgb(255, 0, 0),
+    8px 24px 0 0 rgb(255, 0, 0),
+    12px 24px 0 0 rgb(255, 0, 0),
+    16px 24px 0 0 rgb(255, 0, 0),
+    20px 24px 0 0 rgb(255, 0, 0),
+    
+    /* 第8行：    ███████ */
+    8px 28px 0 0 rgb(255, 0, 0),
+    12px 28px 0 0 rgb(255, 0, 0),
+    16px 28px 0 0 rgb(255, 0, 0),
+    
+    /* 第9行：     █████ */
+    12px 32px 0 0 rgb(255, 0, 0),
+    
+    /* 黑色描边 */
+    -2px -2px 0 0 #000,
+    2px -2px 0 0 #000,
+    6px -2px 0 0 #000,
+    10px -2px 0 0 #000,
+    14px -2px 0 0 #000,
+    18px -2px 0 0 #000,
+    22px -2px 0 0 #000,
+    26px -2px 0 0 #000,
+    -6px 2px 0 0 #000,
+    30px 2px 0 0 #000,
+    -10px 6px 0 0 #000,
+    34px 6px 0 0 #000,
+    -10px 10px 0 0 #000,
+    34px 10px 0 0 #000,
+    -6px 14px 0 0 #000,
+    30px 14px 0 0 #000,
+    -2px 18px 0 0 #000,
+    26px 18px 0 0 #000,
+    2px 22px 0 0 #000,
+    22px 22px 0 0 #000,
+    6px 26px 0 0 #000,
+    18px 26px 0 0 #000,
+    10px 30px 0 0 #000,
+    14px 34px 0 0 #000;
+  transform: translateX(-11px) translateY(-11px);
 }
 
 /* Happiness 图标样式 */
