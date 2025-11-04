@@ -350,6 +350,36 @@ Have fun with your new digital friend! ✨`;
             }</div>`,
           ];
 
+          // 如果包含 face_analyze，添加情绪识别信息
+          if (response.data.face_analyze) {
+            const faceAnalyze = response.data.face_analyze;
+            const emotionEmoji = {
+              happy: '😊',
+              sad: '😢',
+              angry: '😠',
+              surprise: '😲',
+              fear: '😨',
+              disgust: '🤢',
+              neutral: '😐',
+            };
+            
+            const confidencePercent = Math.round(faceAnalyze.confidence * 100);
+            const confidenceColor = 
+              confidencePercent >= 80 ? 'text-green-500' : 
+              confidencePercent >= 60 ? 'text-yellow-500' : 
+              'text-orange-500';
+
+            analysisText.push(
+              `<div class="analysis-line" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.2);">🎭 Face Analysis:</div>`,
+              `<div class="analysis-line" style="padding-left: 8px;">
+                <span style="font-size: 24px;">${emotionEmoji[faceAnalyze.detected_emotion] || '😶'}</span>
+                <span class="text-cyan-400" style="margin-left: 8px; text-transform: capitalize;">${faceAnalyze.detected_emotion}</span>
+              </div>`,
+              `<div class="analysis-line ${confidenceColor}" style="padding-left: 8px;">Confidence: ${confidencePercent}%</div>`,
+              `<div class="analysis-line text-gray-300" style="padding-left: 8px; font-style: italic; font-size: 0.9em;">"${faceAnalyze.analysis}"</div>`
+            );
+          }
+
           // 使用打字机效果显示内容
           const typeAnalysis = async () => {
             setAnalysisResult({ message: '' });
