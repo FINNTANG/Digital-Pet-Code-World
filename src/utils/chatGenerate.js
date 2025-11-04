@@ -52,11 +52,6 @@ async function chatMessage(
     // 调用聊天 API
     const response = await chat(requestData);
 
-    console.log('===== chatGenerate.js 收到响应 =====');
-    console.log('response:', response);
-    console.log('response.data:', response.data);
-    console.log('====================================');
-
     // 检查响应格式
     if (response && response.status === 'success' && response.data.result) {
       // API 返回的是更新后的绝对状态值 (0-100)
@@ -66,52 +61,13 @@ async function chatMessage(
 
       // 返回标准格式的响应（health和mood是变化量，不是绝对值）
 
-      // 情绪识别结果（支持多种可能的字段名）
-      let emotionData = null;
-      if (response.data.detected_emotion || response.data.emotion) {
-        emotionData = {
-          detected_emotion: response.data.detected_emotion || response.data.emotion,
-          confidence: response.data.confidence || 0,
-          analysis: response.data.analysis || response.data.emotion_analysis || '',
-        };
-      } else if (requestData.image_data) {
-        // 临时：如果有图片但后端没有返回情绪数据，生成模拟数据用于测试 UI
-        // TODO: 等后端实现情绪识别后删除这段代码
-        const mockEmotions = [
-          { emotion: 'happy', analysis: 'Bright smile and relaxed expression detected.' },
-          { emotion: 'neutral', analysis: 'Calm and composed facial expression.' },
-          { emotion: 'surprised', analysis: 'Wide eyes suggest mild surprise or interest.' },
-          { emotion: 'focused', analysis: 'Concentrated look with slight tension.' },
-        ];
-        const randomEmotion = mockEmotions[Math.floor(Math.random() * mockEmotions.length)];
-        emotionData = {
-          detected_emotion: randomEmotion.emotion,
-          confidence: 0.85 + Math.random() * 0.14, // 0.85-0.99
-          analysis: randomEmotion.analysis,
-        };
-        console.log('⚠️ chatGenerate: 使用模拟情绪数据（后端未返回）:', emotionData);
-      }
-      
-      const result = {
+      return {
         result: true,
         message: response.data.ai_response || '',
         options: response.data.options || [],
         health: response.data.health, // 健康值变化量
         mood: response.data.mood, // 快乐值变化量
-        // 情绪识别结果（如果有）
-        emotion: emotionData,
       };
-      
-      console.log('===== chatGenerate.js 返回结果 =====');
-      console.log('result.emotion:', result.emotion);
-      console.log('检查的字段:');
-      console.log('  - response.data.detected_emotion:', response.data.detected_emotion);
-      console.log('  - response.data.emotion:', response.data.emotion);
-      console.log('  - response.data.confidence:', response.data.confidence);
-      console.log('  - response.data.analysis:', response.data.analysis);
-      console.log('====================================');
-      
-      return result;
     }
 
     // 如果响应格式不符合预期，返回失败

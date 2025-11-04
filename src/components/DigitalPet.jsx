@@ -97,7 +97,6 @@ const DigitalPet = () => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [userInput, setUserInput] = useState('');
   const inputRef = useRef(null);
-  const [emotionData, setEmotionData] = useState(null);
 
   // 从 petState 获取用户选择的宠物类型
   const [petType, setPetType] = useState(() => {
@@ -310,39 +309,7 @@ Have fun with your new digital friend! ✨`;
 
         clearTimeout(apiTimeoutRef.current);
 
-        console.log('===== 图片分析完整响应 =====');
-        console.log('完整 response 对象:', JSON.stringify(response, null, 2));
-        console.log('response.data 所有字段:', Object.keys(response.data || {}));
-        console.log('detected_emotion:', response.data?.detected_emotion);
-        console.log('confidence:', response.data?.confidence);
-        console.log('analysis:', response.data?.analysis);
-        console.log('===========================');
-
-        // 情绪识别结果（支持多种可能的字段名）
-        let emotionData = null;
-        if (response.data?.detected_emotion || response.data?.emotion) {
-          emotionData = {
-            detected_emotion: response.data.detected_emotion || response.data.emotion,
-            confidence: response.data.confidence || 0,
-            analysis: response.data.analysis || response.data.emotion_analysis || '',
-          };
-        } else {
-          // 临时：如果后端没有返回情绪数据，生成模拟数据用于测试 UI
-          // TODO: 等后端实现情绪识别后删除这段代码
-          const mockEmotions = [
-            { emotion: 'happy', analysis: 'Bright smile and relaxed expression detected.' },
-            { emotion: 'neutral', analysis: 'Calm and composed facial expression.' },
-            { emotion: 'surprised', analysis: 'Wide eyes suggest mild surprise or interest.' },
-            { emotion: 'focused', analysis: 'Concentrated look with slight tension.' },
-          ];
-          const randomEmotion = mockEmotions[Math.floor(Math.random() * mockEmotions.length)];
-          emotionData = {
-            detected_emotion: randomEmotion.emotion,
-            confidence: 0.85 + Math.random() * 0.14, // 0.85-0.99
-            analysis: randomEmotion.analysis,
-          };
-          console.log('⚠️ 使用模拟情绪数据（后端未返回）:', emotionData);
-        }
+        console.log(response, 'response');
 
         // 适配 chat API 的返回格式为 analyzeImage 格式
         const result = {
@@ -354,16 +321,7 @@ Have fun with your new digital friend! ✨`;
             (response.data?.health || currentHealth) - currentHealth,
           moodEffect:
             (response.data?.mood || currentHappiness) - currentHappiness,
-          // 添加情绪识别结果
-          emotion: emotionData,
         };
-        
-        console.log('处理后的result.emotion:', result.emotion);
-        console.log('检查的字段:');
-        console.log('  - response.data.detected_emotion:', response.data?.detected_emotion);
-        console.log('  - response.data.emotion:', response.data?.emotion);
-        console.log('  - response.data.confidence:', response.data?.confidence);
-        console.log('  - response.data.analysis:', response.data?.analysis);
 
         if (result.result) {
           // 更新宠物状态（使用 API 返回的新值）
@@ -379,19 +337,6 @@ Have fun with your new digital friend! ✨`;
             }">Status: ${
               result.isLike ? 'I like it!' : "I don't like it..."
             }</div>`,
-          ];
-
-          // 如果有情绪识别结果，添加情绪信息
-          if (result.emotion) {
-            analysisText.push(
-              `<div class="analysis-line text-purple-400">━━━ Emotion Detected ━━━</div>`,
-              `<div class="analysis-line text-cyan-400">Emotion: ${result.emotion.detected_emotion}</div>`,
-              `<div class="analysis-line text-cyan-400">Confidence: ${(result.emotion.confidence * 100).toFixed(1)}%</div>`,
-              `<div class="analysis-line text-gray-300">${result.emotion.analysis}</div>`,
-            );
-          }
-
-          analysisText.push(
             `<div class="analysis-line">Effects:</div>`,
             `<div class="analysis-line ${
               result.moodEffect >= 0 ? 'text-green-500' : 'text-red-500'
@@ -403,7 +348,7 @@ Have fun with your new digital friend! ✨`;
             }">Health: ${result.healthEffect >= 0 ? '+' : ''}${
               result.healthEffect
             }</div>`,
-          );
+          ];
 
           // 使用打字机效果显示内容
           const typeAnalysis = async () => {
@@ -448,7 +393,6 @@ Have fun with your new digital friend! ✨`;
   const handleChat = () => {
     setShowChat(true);
     setUserInput(''); // 重置输入框
-    setEmotionData(null); // 清除之前的情绪数据
 
     // 根据不同宠物类型生成不同的初始对话
     let initialMessage;
@@ -519,10 +463,7 @@ Have fun with your new digital friend! ✨`;
         petType,
       );
 
-      console.log('===== 聊天完整响应 =====');
-      console.log('response:', response);
-      console.log('response.emotion:', response.emotion);
-      console.log('=======================');
+      console.log(response, 'response');
 
       if (response.result) {
         // 设置对话内容和选项
@@ -531,15 +472,6 @@ Have fun with your new digital friend! ✨`;
           options: response.options,
         });
         typeMessage(response.message);
-
-        // 保存情绪识别数据（如果有）
-        if (response.emotion) {
-          console.log('设置情绪数据:', response.emotion);
-          setEmotionData(response.emotion);
-        } else {
-          console.log('没有情绪数据');
-          setEmotionData(null);
-        }
 
         // 更新宠物状态（response.health和response.mood是变化量）
         // 确保值在 0-100 范围内
@@ -765,7 +697,6 @@ Have fun with your new digital friend! ✨`;
       setShowCamera(false);
     } else if (windowType === 'chat') {
       setShowChat(false);
-      setEmotionData(null); // 清除情绪数据
     } else if (windowType === 'hint') {
       setShowHint(false);
     } else if (windowType === 'analysis') {
@@ -1184,32 +1115,7 @@ Have fun with your new digital friend! ✨`;
                   </div>
                 </div>
               ) : (
-                <>
-                  <div>{displayedMessage}</div>
-                  {/* 显示情绪识别结果 */}
-                  {emotionData && (
-                    <div className="emotion-display" style={{
-                      marginTop: '15px',
-                      padding: '10px',
-                      background: 'rgba(147, 51, 234, 0.1)',
-                      border: '1px solid rgba(147, 51, 234, 0.3)',
-                      borderRadius: '4px'
-                    }}>
-                      <div style={{ color: '#a78bfa', fontSize: '12px', marginBottom: '8px' }}>
-                        ━━━ 情绪识别 ━━━
-                      </div>
-                      <div style={{ color: '#67e8f9', fontSize: '13px', marginBottom: '4px' }}>
-                        情绪: {emotionData.detected_emotion}
-                      </div>
-                      <div style={{ color: '#67e8f9', fontSize: '13px', marginBottom: '4px' }}>
-                        置信度: {(emotionData.confidence * 100).toFixed(1)}%
-                      </div>
-                      <div style={{ color: '#d1d5db', fontSize: '12px', fontStyle: 'italic' }}>
-                        {emotionData.analysis}
-                      </div>
-                    </div>
-                  )}
-                </>
+                displayedMessage
               )}
             </div>
             {dialogue && dialogue.options && !isWaitingResponse && (
