@@ -35,6 +35,16 @@ async function analyzeImage(base64Image, petType) {
   
       // 解析清理后的 JSON
       const parsedContent = JSON.parse(content);
+      
+      // 如果包含情绪识别结果，添加到返回对象中
+      if (parsedContent.detected_emotion) {
+        parsedContent.emotion = {
+          detected_emotion: parsedContent.detected_emotion,
+          confidence: parsedContent.confidence,
+          analysis: parsedContent.analysis,
+        };
+      }
+      
       return parsedContent;
     } catch (error) {
       console.error('图片分析失败:', error);

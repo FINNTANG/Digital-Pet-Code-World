@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // ==================== 配置常量 ====================
-const API_BASE_URL = 'https://pet-api.plusdoit.com/api';
+// const API_BASE_URL = 'https://pet-api.plusdoit.com/api';
+const API_BASE_URL = 'http://localhost:8000/api';
 // const API_BASE_URL =  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 const TOKEN_KEY = 'access_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
