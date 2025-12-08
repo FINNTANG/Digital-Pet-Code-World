@@ -25,6 +25,11 @@ body {
   -moz-osx-font-smoothing: none;
   background-color: #000000;  /* 纯黑背景 */
   color: #ffffff;
+  /* 移动端优化 */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+  overflow-x: hidden;
 }
 
 /* 添加全局滚动条样式 */
@@ -98,4 +103,20 @@ body {
   z-index: -1;
   background: transparent;  /* 改为透明背景 */
   overflow: hidden;
+}
+
+/* 移动端全局样式 */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* 优化移动端滚动 */
+  html {
+    -webkit-overflow-scrolling: touch;
+  }
 }

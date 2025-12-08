@@ -493,6 +493,92 @@ const LoginForm = () => {
           color: rgba(0, 255, 0, 0.3);
           font-family: 'VT323', monospace;
         }
+        
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+          .min-h-screen {
+            padding: 20px 0;
+          }
+          
+          /* 调整标题大小 */
+          .text-center > div:first-child {
+            font-size: 36px !important;
+            letter-spacing: 4px !important;
+            line-height: 1.2;
+            word-break: break-word;
+          }
+          
+          /* 调整副标题 */
+          .text-center > div:nth-child(2) {
+            padding: 3px 10px !important;
+          }
+          
+          .text-center > div:nth-child(2) > div {
+            font-size: 12px !important;
+            letter-spacing: 2px !important;
+          }
+          
+          /* 调整表单容器 */
+          .relative.z-10 > div:nth-child(2) {
+            padding: 30px 20px !important;
+          }
+          
+          /* 调整输入框字体 */
+          input {
+            font-size: 18px !important;
+            padding: 12px 8px !important;
+          }
+          
+          /* 调整按钮 */
+          button[type="submit"] {
+            font-size: 18px !important;
+            padding: 15px 20px !important;
+            letter-spacing: 2px !important;
+          }
+          
+          /* 调整底部按钮 */
+          .mt-8.space-y-4 button {
+            font-size: 14px !important;
+          }
+          
+          /* 调整标签文字 */
+          label > div {
+            font-size: 12px !important;
+          }
+          
+          /* 调整底部文字 */
+          .text-center.mt-12 > div {
+            font-size: 10px !important;
+          }
+          
+          /* 减小间距 */
+          .mb-16 {
+            margin-bottom: 2rem !important;
+          }
+          
+          .space-y-8 > * + * {
+            margin-top: 1.5rem !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .text-center > div:first-child {
+            font-size: 28px !important;
+            letter-spacing: 2px !important;
+          }
+          
+          .relative.z-10 > div:nth-child(2) {
+            padding: 20px 15px !important;
+          }
+          
+          input {
+            font-size: 16px !important;
+          }
+          
+          button[type="submit"] {
+            font-size: 16px !important;
+          }
+        }
       `}</style>
     </div>
   );

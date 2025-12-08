@@ -195,10 +195,46 @@ function GameScreen() {
   }, []);
 
   return (
-    <div className="flex relative justify-center items-center p-4 min-h-screen">
+    <div className="flex relative justify-center items-center p-4 min-h-screen game-screen-container">
       <style jsx global>{`
         /* 全局自定义光标 - 强制应用 */
         /* 光标样式已移至 CustomCursor 组件 */
+        
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+          .game-screen-container {
+            padding: 0 !important;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+          }
+          
+          /* 隐藏3D背景以提升性能 */
+          #background-canvas {
+            display: none;
+          }
+          
+          /* 添加简单的渐变背景替代 */
+          .game-screen-container::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+              ellipse at center,
+              rgba(0, 50, 0, 0.2) 0%,
+              rgba(0, 0, 0, 0.9) 100%
+            );
+            z-index: -1;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .game-screen-container {
+            padding: 0 !important;
+          }
+        }
       `}</style>
       <div
         id="background-canvas"

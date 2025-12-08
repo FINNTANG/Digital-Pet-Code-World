@@ -3029,6 +3029,279 @@ body::after,
   align-items: stretch;
 }
 
+/* ========== 移动端适配样式 ========== */
+@media (max-width: 768px) {
+  /* 状态条容器 */
+  .status-container {
+    top: 10px;
+    left: 10px;
+    gap: 10px;
+    padding: 8px;
+  }
+  
+  .status-bar {
+    height: 28px;
+    margin-left: 30px;
+  }
+  
+  .status-icon {
+    width: 36px;
+    height: 36px;
+    left: -35px;
+  }
+  
+  .health-bar, .happiness-bar {
+    width: 200px;
+  }
+  
+  .progress-text {
+    font-size: 12px;
+    right: 8px;
+  }
+  
+  /* 宠物显示区域 */
+  .pet-display {
+    height: 300px;
+    margin: 1.5rem 0;
+  }
+  
+  .pet-sprite {
+    max-width: 200px;
+    max-height: 200px;
+  }
+  
+  /* 控制按钮 */
+  .control-buttons {
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 0 20px;
+  }
+  
+  .control-button {
+    font-size: 18px;
+    padding: 12px 24px;
+    margin: 0;
+    width: 100%;
+  }
+  
+  /* 窗口样式 */
+  .camera-window, .chat-window, .analysis-window {
+    width: 95vw !important;
+    max-width: 95vw;
+    left: 2.5vw !important;
+    right: 2.5vw !important;
+  }
+  
+  .hint-window {
+    width: 90vw !important;
+  }
+  
+  .window-toolbar {
+    padding: 6px 10px;
+  }
+  
+  .window-title {
+    font-size: 12px;
+  }
+  
+  .window-close {
+    font-size: 16px;
+  }
+  
+  /* 聊天窗口 */
+  .chat-content {
+    padding: 15px;
+    min-height: 150px;
+  }
+  
+  .chat-message {
+    font-size: 12px;
+    line-height: 1.6;
+    padding: 10px;
+    max-width: 100%;
+  }
+  
+  .chat-options {
+    padding: 8px;
+    gap: 10px;
+  }
+  
+  .chat-option {
+    font-size: 12px;
+    padding: 12px 16px;
+  }
+  
+  .chat-input {
+    font-size: 11px;
+    padding: 10px 12px;
+  }
+  
+  .chat-send-button {
+    font-size: 11px;
+    padding: 10px 16px;
+    min-width: 70px;
+  }
+  
+  /* 相机窗口 */
+  .camera-content video {
+    max-height: 40vh;
+  }
+  
+  .camera-button, .pixel-button {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  
+  /* 分析结果 */
+  .analysis-content {
+    padding: 15px;
+    gap: 15px;
+  }
+  
+  .analysis-line {
+    font-size: 11px;
+    margin: 8px 0;
+  }
+  
+  /* 宠物窗口 */
+  .pet-window {
+    width: 90vw !important;
+    height: auto !important;
+    min-height: 250px;
+  }
+  
+  .pet-face {
+    font-size: 36px !important;
+  }
+  
+  /* 游戏结束界面 */
+  .game-over-window {
+    width: 90vw;
+    max-width: 400px;
+  }
+  
+  .game-over-content {
+    padding: 30px 20px;
+  }
+  
+  .glitch-text {
+    font-size: 32px;
+    margin-bottom: 20px;
+  }
+  
+  .game-over-message {
+    font-size: 14px;
+    margin-bottom: 30px;
+  }
+  
+  .restart-button {
+    font-size: 16px;
+    padding: 15px 30px;
+  }
+  
+  /* 提示窗口 */
+  .hint-text {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  
+  /* 声音开关 */
+  .sound-toggle {
+    width: 50px;
+    height: 25px;
+  }
+  
+  .toggle-slider {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .sound-toggle.on .toggle-slider {
+    transform: translateX(25px);
+  }
+}
+
+@media (max-width: 480px) {
+  /* 更小屏幕的额外优化 */
+  .status-container {
+    top: 5px;
+    left: 5px;
+    gap: 8px;
+    padding: 5px;
+  }
+  
+  .health-bar, .happiness-bar {
+    width: 150px;
+  }
+  
+  .progress-text {
+    font-size: 10px;
+  }
+  
+  .pet-display {
+    height: 250px;
+  }
+  
+  .pet-sprite {
+    max-width: 150px;
+    max-height: 150px;
+  }
+  
+  .control-button {
+    font-size: 16px;
+    padding: 10px 20px;
+  }
+  
+  .chat-message {
+    font-size: 11px;
+  }
+  
+  .chat-option {
+    font-size: 11px;
+    padding: 10px 14px;
+  }
+  
+  .glitch-text {
+    font-size: 24px;
+  }
+  
+  .game-over-message {
+    font-size: 12px;
+  }
+  
+  .restart-button {
+    font-size: 14px;
+    padding: 12px 24px;
+  }
+}
+
+/* 横屏模式优化 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .status-container {
+    flex-direction: row;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    gap: 15px;
+  }
+  
+  .pet-display {
+    height: 200px;
+  }
+  
+  .control-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .control-button {
+    width: auto;
+    flex: 1;
+    min-width: 120px;
+  }
+}
+
 .chat-input {
   flex: 1;
   background: rgba(0, 0, 0, 0.7);

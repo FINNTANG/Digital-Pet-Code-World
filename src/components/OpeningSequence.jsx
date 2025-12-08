@@ -1549,6 +1549,68 @@ const OpeningSequence = ({ onStartGame }) => {
         button, input {
           transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+          /* 调整打字机效果文字大小 */
+          .typewriter .typing-text {
+            font-size: 48px !important;
+          }
+          
+          .typing-cursor {
+            height: 48px !important;
+            width: 8px !important;
+            margin-top: -16px !important;
+          }
+          
+          /* 调整输入框 */
+          input[type="text"] {
+            font-size: 20px !important;
+            padding: 12px 16px !important;
+          }
+          
+          .pixel-cursor {
+            height: 28px !important;
+            width: 3px !important;
+          }
+          
+          /* 调整按钮 */
+          button {
+            font-size: 18px !important;
+            padding: 14px 32px !important;
+          }
+          
+          /* 调整容器内边距 */
+          .min-h-screen > div {
+            padding: 20px !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .typewriter .typing-text {
+            font-size: 32px !important;
+          }
+          
+          .typing-cursor {
+            height: 32px !important;
+            width: 6px !important;
+            margin-top: -10px !important;
+          }
+          
+          input[type="text"] {
+            font-size: 16px !important;
+            padding: 10px 12px !important;
+          }
+          
+          .pixel-cursor {
+            height: 24px !important;
+          }
+          
+          button {
+            font-size: 16px !important;
+            padding: 12px 24px !important;
+          }
+        }
       `}</style>
     </div>
   );

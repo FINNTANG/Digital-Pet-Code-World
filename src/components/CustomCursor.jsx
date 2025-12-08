@@ -6,10 +6,23 @@ const CustomCursor = () => {
   const [click, setClick] = useState(false);
   const [hover, setHover] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   
   // 使用 ref 来存储当前位置，以便在 animation frame 中使用最新的值
   const mousePosition = useRef({ x: 0, y: 0 });
   const trailerPosition = useRef({ x: 0, y: 0 });
+
+  // 检测是否为触摸设备
+  useEffect(() => {
+    const checkTouchDevice = () => {
+      return (
+        'ontouchstart' in window ||
+        navigator.maxTouchPoints > 0 ||
+        navigator.msMaxTouchPoints > 0
+      );
+    };
+    setIsTouchDevice(checkTouchDevice());
+  }, []);
 
   useEffect(() => {
     const onMouseMove = (e) => {
@@ -96,6 +109,11 @@ const CustomCursor = () => {
 
     return () => cancelAnimationFrame(animationFrameId);
   }, []);
+
+  // 如果是触摸设备，不渲染自定义光标
+  if (isTouchDevice) {
+    return null;
+  }
 
   return (
     <>
