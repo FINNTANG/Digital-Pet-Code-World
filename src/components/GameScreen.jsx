@@ -206,33 +206,31 @@ function GameScreen() {
             padding: 0 !important;
             min-height: 100vh;
             min-height: -webkit-fill-available;
+            overflow-x: hidden;
+            overflow-y: auto;
           }
           
-          /* 隐藏3D背景以提升性能 */
+          /* 保留3D背景但降低复杂度 */
           #background-canvas {
-            display: none;
+            display: block !important;
+            opacity: 0.5 !important;
+            pointer-events: none;
           }
-          
-          /* 添加简单的渐变背景替代 */
-          .game-screen-container::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(
-              ellipse at center,
-              rgba(0, 50, 0, 0.2) 0%,
-              rgba(0, 0, 0, 0.9) 100%
-            );
-            z-index: -1;
+
+          #background-canvas canvas {
+            width: 100vw !important;
+            height: 100vh !important;
           }
         }
         
         @media (max-width: 480px) {
           .game-screen-container {
             padding: 0 !important;
+          }
+
+          /* 进一步降低背景透明度 */
+          #background-canvas {
+            opacity: 0.3 !important;
           }
         }
       `}</style>

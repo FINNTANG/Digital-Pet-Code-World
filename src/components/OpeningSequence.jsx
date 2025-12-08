@@ -339,7 +339,7 @@ const OpeningSequence = ({ onStartGame }) => {
 
         {(showInput || fadeOutPrompt) && phase === 'select' && (
           <div
-            className="flex flex-row items-start justify-center gap-16"
+            className="flex flex-row md:flex-row flex-col items-center justify-center gap-8 md:gap-16"
             style={{
               opacity: fadeOutPrompt ? 0 : 1,
               transform: fadeOutPrompt ? 'translateY(20px) scale(0.98)' : 'translateY(0) scale(1)',
@@ -367,6 +367,7 @@ const OpeningSequence = ({ onStartGame }) => {
               >
                 {/* 电子宠物机外壳 - 半透明青色冰晶风格 */}
                 <div
+                  className="pet-machine-mobile"
                   style={{
                     width: '280px',
                     height: '360px',
@@ -422,6 +423,7 @@ const OpeningSequence = ({ onStartGame }) => {
 
                   {/* 品牌标识区 */}
                   <div
+                    className="brand-label"
                     style={{
                       position: 'absolute',
                       top: '45px',
@@ -454,6 +456,7 @@ const OpeningSequence = ({ onStartGame }) => {
 
                   {/* 屏幕区域 */}
                   <div
+                    className="pet-screen"
                     style={{
                       position: 'absolute',
                       top: '85px',
@@ -485,7 +488,7 @@ const OpeningSequence = ({ onStartGame }) => {
                     }} />
 
                     {/* 液晶屏幕本体 */}
-                    <div style={{
+                    <div className="pet-screen-inner" style={{
                       width: '140px',
                       height: '140px',
                       background: '#8bac95', // 保持经典 GameBoy 屏幕底色，但稍微调亮一点点
@@ -555,6 +558,7 @@ const OpeningSequence = ({ onStartGame }) => {
                         }}
                       >
                         <img
+                          className="pet-gif"
                           src={pet.gifPath}
                           alt={pet.displayName}
                           style={{
@@ -571,7 +575,7 @@ const OpeningSequence = ({ onStartGame }) => {
                   </div>
 
                   {/* 控制区装饰 */}
-                  <div style={{
+                  <div className="control-deco" style={{
                     position: 'absolute',
                     bottom: '70px',
                     left: '30px',
@@ -591,6 +595,7 @@ const OpeningSequence = ({ onStartGame }) => {
 
                   {/* 主按键 - 统一为绿色系 */}
                   <div
+                      className="main-button"
                       style={{
                       position: 'absolute',
                       bottom: '30px',
@@ -621,6 +626,7 @@ const OpeningSequence = ({ onStartGame }) => {
 
                   {/* 选择提示 */}
                   <div
+                    className="select-hint"
                     style={{
                       position: 'absolute',
                       bottom: '-40px',
@@ -665,6 +671,7 @@ const OpeningSequence = ({ onStartGame }) => {
 
             {/* Selected Pet Display - 电子宠物机样式 */}
             <div
+              className="pet-machine-mobile"
               style={{
                 width: '280px',
                 height: '360px',
@@ -717,6 +724,7 @@ const OpeningSequence = ({ onStartGame }) => {
 
               {/* 品牌标识 */}
               <div
+                className="brand-label"
                 style={{
                   position: 'absolute',
                   top: '45px',
@@ -749,6 +757,7 @@ const OpeningSequence = ({ onStartGame }) => {
 
               {/* LCD屏幕 */}
               <div
+                className="pet-screen"
                 style={{
                   position: 'absolute',
                   top: '85px',
@@ -780,7 +789,7 @@ const OpeningSequence = ({ onStartGame }) => {
                 }} />
 
                 {/* 屏幕玻璃层 */}
-                <div style={{
+                <div className="pet-screen-inner" style={{
                   width: '140px',
                   height: '140px',
                   background: '#8bac95',
@@ -1074,6 +1083,7 @@ const OpeningSequence = ({ onStartGame }) => {
 
             {/* Final Pet Display - 电子宠物机样式 */}
             <div
+              className="pet-machine-mobile"
               style={{
                 width: '300px',
                 height: '380px',
@@ -1554,61 +1564,276 @@ const OpeningSequence = ({ onStartGame }) => {
         @media (max-width: 768px) {
           /* 调整打字机效果文字大小 */
           .typewriter .typing-text {
-            font-size: 48px !important;
+            font-size: 36px !important;
           }
           
           .typing-cursor {
-            height: 48px !important;
-            width: 8px !important;
-            margin-top: -16px !important;
+            height: 36px !important;
+            width: 6px !important;
+            margin-top: -12px !important;
           }
           
           /* 调整输入框 */
           input[type="text"] {
-            font-size: 20px !important;
+            font-size: 18px !important;
             padding: 12px 16px !important;
+            min-width: 90vw !important;
+            max-width: 90vw !important;
           }
           
           .pixel-cursor {
-            height: 28px !important;
+            height: 24px !important;
             width: 3px !important;
           }
           
           /* 调整按钮 */
           button {
-            font-size: 18px !important;
-            padding: 14px 32px !important;
+            font-size: 16px !important;
+            padding: 12px 28px !important;
           }
           
           /* 调整容器内边距 */
-          .min-h-screen > div {
-            padding: 20px !important;
+          .relative.z-10.flex {
+            padding: 15px 10px !important;
+          }
+
+          /* 选择页面的提示文字 - 修复"Choose your virtual companion" */
+          .text-2xl {
+            font-size: 16px !important;
+            margin-bottom: 10px !important;
+            line-height: 1.4 !important;
+            padding: 0 10px !important;
+          }
+          
+          .text-2xl .pixel-text {
+            font-size: 24px !important;
+            letter-spacing: 2px !important;
+            white-space: normal !important;
+            word-break: break-word !important;
+            text-align: center !important;
+          }
+
+          /* 电子宠物机缩小并适配 */
+          .pet-machine-mobile {
+            width: 200px !important;
+            height: 260px !important;
+            margin: 10px 0 !important;
+          }
+
+          .pet-machine-mobile .brand-label {
+            width: 130px !important;
+            height: 20px !important;
+            top: 32px !important;
+          }
+
+          .pet-machine-mobile .brand-label > div {
+            font-size: 10px !important;
+          }
+
+          .pet-machine-mobile .pet-screen {
+            width: 160px !important;
+            height: 130px !important;
+            top: 60px !important;
+          }
+
+          .pet-machine-mobile .pet-screen-inner {
+            width: 100px !important;
+            height: 100px !important;
+          }
+
+          .pet-machine-mobile .pet-screen-inner > div:first-child {
+            background-size: 2px 2px !important;
+          }
+
+          .pet-machine-mobile .pet-gif, 
+          .pet-machine-mobile img {
+            width: 65px !important;
+            height: 65px !important;
+          }
+
+          .pet-machine-mobile .main-button {
+            width: 35px !important;
+            height: 35px !important;
+            bottom: 20px !important;
+            right: 20px !important;
+          }
+
+          .pet-machine-mobile .main-button > div {
+            width: 35px !important;
+            height: 35px !important;
+          }
+
+          .pet-machine-mobile .control-deco {
+            bottom: 50px !important;
+            left: 20px !important;
+          }
+
+          .pet-machine-mobile .control-deco > div {
+            width: 3px !important;
+            height: 10px !important;
+          }
+
+          /* 选择提示 */
+          .select-hint {
+            bottom: -30px !important;
+            font-size: 12px !important;
+          }
+
+          /* Naming阶段样式 */
+          .pixel-input-wrapper {
+            width: 90vw !important;
+          }
+          
+          /* 命名阶段所有文字 */
+          .flex.flex-col.items-center.gap-6 .pixel-text {
+            font-size: 20px !important;
+            letter-spacing: 1.5px !important;
+          }
+          
+          /* "You selected: FOX" 文字 */
+          div[style*="fontSize: '38px'"] {
+            font-size: 24px !important;
+          }
+          
+          /* "Enter a name" 文字 */
+          div[style*="fontSize: '32px'"] {
+            font-size: 20px !important;
+          }
+          
+          /* "Welcome" 文字 */
+          div[style*="fontSize: '50px'"] {
+            font-size: 32px !important;
+          }
+          
+          /* START 按钮 */
+          .px-20.py-4.text-4xl {
+            font-size: 24px !important;
+            padding: 12px 40px !important;
+          }
+
+          /* Ready阶段特殊调整 */
+          .pet-machine-mobile:last-of-type {
+            margin-bottom: 20px !important;
+          }
+          
+          /* 宠物机容器在选择页面横向排列时的调整 */
+          .flex-row.flex-col {
+            flex-direction: column !important;
+            gap: 15px !important;
           }
         }
         
         @media (max-width: 480px) {
           .typewriter .typing-text {
-            font-size: 32px !important;
+            font-size: 28px !important;
           }
           
           .typing-cursor {
-            height: 32px !important;
-            width: 6px !important;
+            height: 28px !important;
+            width: 5px !important;
             margin-top: -10px !important;
           }
           
           input[type="text"] {
             font-size: 16px !important;
             padding: 10px 12px !important;
+            min-width: 85vw !important;
+            max-width: 85vw !important;
           }
           
           .pixel-cursor {
-            height: 24px !important;
+            height: 20px !important;
           }
           
           button {
-            font-size: 16px !important;
-            padding: 12px 24px !important;
+            font-size: 14px !important;
+            padding: 10px 20px !important;
+          }
+
+          /* 提示文字进一步缩小 */
+          .text-2xl {
+            font-size: 14px !important;
+          }
+          
+          .text-2xl .pixel-text {
+            font-size: 18px !important;
+            letter-spacing: 1px !important;
+          }
+          
+          /* "You selected" 文字 */
+          div[style*="fontSize: '38px'"] {
+            font-size: 20px !important;
+          }
+          
+          /* "Enter a name" 文字 */
+          div[style*="fontSize: '32px'"] {
+            font-size: 18px !important;
+          }
+          
+          /* "Welcome" 文字 */
+          div[style*="fontSize: '50px'"] {
+            font-size: 28px !important;
+          }
+          
+          /* START 按钮 */
+          .px-20.py-4.text-4xl {
+            font-size: 20px !important;
+            padding: 10px 30px !important;
+          }
+
+          /* 更小屏幕进一步缩小 */
+          .pet-machine-mobile {
+            width: 180px !important;
+            height: 235px !important;
+            margin: 8px 0 !important;
+          }
+
+          .pet-machine-mobile .brand-label {
+            width: 115px !important;
+            height: 18px !important;
+            top: 28px !important;
+          }
+
+          .pet-machine-mobile .brand-label > div {
+            font-size: 9px !important;
+          }
+
+          .pet-machine-mobile .pet-screen {
+            width: 145px !important;
+            height: 115px !important;
+            top: 53px !important;
+          }
+
+          .pet-machine-mobile .pet-screen-inner {
+            width: 90px !important;
+            height: 90px !important;
+          }
+
+          .pet-machine-mobile .pet-gif,
+          .pet-machine-mobile img {
+            width: 58px !important;
+            height: 58px !important;
+          }
+
+          .pet-machine-mobile .main-button {
+            width: 32px !important;
+            height: 32px !important;
+            bottom: 18px !important;
+            right: 18px !important;
+          }
+
+          .pet-machine-mobile .main-button > div {
+            width: 32px !important;
+            height: 32px !important;
+          }
+
+          .pet-machine-mobile .control-deco {
+            bottom: 45px !important;
+            left: 18px !important;
+          }
+
+          .select-hint {
+            font-size: 11px !important;
           }
         }
       `}</style>
