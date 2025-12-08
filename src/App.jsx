@@ -5,6 +5,7 @@ import GameScreen from './components/GameScreen';
 import OpeningMusic from './components/OpeningMusic';
 import LoginForm from './components/LoginForm';
 import PrivacyPolicy from './components/PrivacyPolicy';
+import CustomCursor from './components/CustomCursor';
 import { isAuthenticated } from './api/auth';
 
 // 受保护的路由组件 - 检查认证状态
@@ -87,6 +88,7 @@ function App() {
 
   return (
     <Router>
+      <CustomCursor />
       <Routes>
         {/* 登录页面 - 如果已登录则自动重定向 */}
         <Route path="/login" element={<LoginRoute />} />

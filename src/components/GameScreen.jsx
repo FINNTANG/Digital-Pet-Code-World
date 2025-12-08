@@ -196,6 +196,10 @@ function GameScreen() {
 
   return (
     <div className="flex relative justify-center items-center p-4 min-h-screen">
+      <style jsx global>{`
+        /* 全局自定义光标 - 强制应用 */
+        /* 光标样式已移至 CustomCursor 组件 */
+      `}</style>
       <div
         id="background-canvas"
         className="fixed top-0 left-0 w-full h-full z-[-1]"

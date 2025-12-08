@@ -2186,15 +2186,13 @@ body::after,
 
 /* 声音开关按钮样式 */
 .sound-toggle {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
+  position: relative; /* 改为 relative，因为父容器已经定位了 */
   width: 60px;
   height: 30px;
   background: #1a1a1a;
   border: 2px solid #00ff66;
   border-radius: 15px;
-  cursor: pointer;
+  cursor: none !important;
   padding: 2px;
   transition: all 0.3s ease;
 }
@@ -2767,81 +2765,177 @@ body::after,
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.92);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 9999;
   animation: fadeIn 0.5s ease-out;
+  backdrop-filter: blur(5px);
+}
+
+/* CRT 扫描线背景效果 */
+.game-over-overlay::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  z-index: 2;
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
 }
 
 .game-over-window {
-  background: rgba(0, 0, 0, 0.95);
-  border: 2px solid #ff0000;
-  width: 500px;
-  box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+  background: #0a0000;
+  border: 4px solid #ff0000;
+  width: 600px;
+  box-shadow: 
+    0 0 30px rgba(255, 0, 0, 0.4),
+    inset 0 0 50px rgba(255, 0, 0, 0.1);
+  position: relative;
+  animation: windowShake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* 窗口边角装饰 */
+.game-over-window::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  border: 2px solid rgba(255, 0, 0, 0.3);
+  pointer-events: none;
 }
 
 .game-over-content {
-  padding: 40px;
+  padding: 50px;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 红色扫描线 */
+.game-over-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(transparent 50%, rgba(255, 0, 0, 0.1) 50%);
+  background-size: 100% 4px;
+  pointer-events: none;
 }
 
 .glitch-text {
   font-family: 'Press Start 2P', cursive;
-  font-size: 36px;
+  font-size: 48px;
   color: #ff0000;
-  text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
-  margin-bottom: 30px;
-  animation: glitchText 1s infinite;
+  text-shadow: 
+    2px 2px 0px #550000,
+    -2px -2px 0px #ff5555,
+    0 0 20px rgba(255, 0, 0, 0.8);
+  margin-bottom: 40px;
+  position: relative;
+  animation: glitchSkew 1s infinite linear alternate-reverse;
+}
+
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.glitch-text::before {
+  left: 2px;
+  text-shadow: -1px 0 #00ffff;
+  clip: rect(24px, 550px, 90px, 0);
+  animation: glitch-anim-2 3s infinite linear alternate-reverse;
+}
+
+.glitch-text::after {
+  left: -2px;
+  text-shadow: -1px 0 #ff00ff;
+  clip: rect(85px, 550px, 140px, 0);
+  animation: glitch-anim 2.5s infinite linear alternate-reverse;
 }
 
 .game-over-message {
   font-family: 'Press Start 2P', cursive;
-  font-size: 16px;
-  color: #ffffff;
-  margin-bottom: 40px;
-  line-height: 1.6;
+  font-size: 18px;
+  color: #ff8888;
+  margin-bottom: 50px;
+  line-height: 1.8;
+  text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
 }
 
 .restart-button {
-  background: transparent;
-  border: 2px solid #00ff66;
-  color: #00ff66;
+  background: #2a0000;
+  border: 2px solid #ff0000;
+  color: #ff0000;
   font-family: 'Press Start 2P', cursive;
-  font-size: 18px;
-  padding: 15px 30px;
+  font-size: 20px;
+  padding: 20px 40px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.2);
 }
 
 .restart-button:hover {
-  background: rgba(0, 255, 102, 0.1);
-  box-shadow: 0 0 15px rgba(0, 255, 102, 0.3);
-  transform: translateY(-2px);
+  background: #ff0000;
+  color: #000;
+  box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
+  transform: scale(1.05);
 }
 
-@keyframes glitchText {
-  0% {
-    text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
-    transform: translateX(0);
-  }
-  25% {
-    text-shadow: -2px 0 10px rgba(255, 0, 0, 0.7);
-    transform: translateX(2px);
-  }
-  50% {
-    text-shadow: 2px 0 10px rgba(255, 0, 0, 0.7);
-    transform: translateX(-2px);
-  }
-  75% {
-    text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
-    transform: translateX(1px);
-  }
-  100% {
-    text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
-    transform: translateX(0);
-  }
+.restart-button:active {
+  transform: scale(0.95);
+}
+
+@keyframes windowShake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+@keyframes glitchSkew {
+  0% { transform: skew(0deg); }
+  20% { transform: skew(-2deg); }
+  40% { transform: skew(2deg); }
+  60% { transform: skew(-1deg); }
+  80% { transform: skew(1deg); }
+  100% { transform: skew(0deg); }
+}
+
+@keyframes glitch-anim {
+  0% { clip: rect(36px, 9999px, 9px, 0); }
+  20% { clip: rect(72px, 9999px, 88px, 0); }
+  40% { clip: rect(11px, 9999px, 65px, 0); }
+  60% { clip: rect(89px, 9999px, 95px, 0); }
+  80% { clip: rect(3px, 9999px, 26px, 0); }
+  100% { clip: rect(54px, 9999px, 12px, 0); }
+}
+
+@keyframes glitch-anim-2 {
+  0% { clip: rect(65px, 9999px, 100px, 0); }
+  20% { clip: rect(12px, 9999px, 45px, 0); }
+  40% { clip: rect(98px, 9999px, 6px, 0); }
+  60% { clip: rect(34px, 9999px, 76px, 0); }
+  80% { clip: rect(21px, 9999px, 87px, 0); }
+  100% { clip: rect(5px, 9999px, 33px, 0); }
 }
 
 /* 修改思考提示词的样式 */

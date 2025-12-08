@@ -109,22 +109,24 @@ const DigitalPet = () => {
   const petTraits = getPetTraits() || [];
 
   // 修改提示信息为更简洁的版本
-  const hintMessage = `[ DIGITAL PET GUIDE ]
+  const hintMessage = `[ PET.EXE MANUAL v1.0 ]
 
-❤️ Health & Mood
-• Both stats decrease over time
-• Keep them above 30% to avoid distress
+❤️ VITALS
+>> HP & MOOD drain constantly.
+   (Entropy is inevitable)
+>> Keep > 30% or I get dramatic.
 
-🎮 Controls
-• FEED - Show objects via camera
-• TALK - Chat with your pet
+🎮 INPUTS
+>> FEED: Show me matter via camera.
+   (I have specific tastes)
+>> TALK: Text me. I get lonely.
 
-💡 Tips
-• Different items = Different reactions
-• Regular chats = Happy pet
-• Low stats = Sad expressions
+💡 PRO-TIPS
+>> Variety = Spice of life.
+>> Neglect = Glitchy sad face.
+>> I see everything.
 
-Have fun with your new digital friend! ✨`;
+Enjoy your new responsibility. ✨`;
 
   // 修改相机权限的处理
   useEffect(() => {
@@ -1064,7 +1066,13 @@ Have fun with your new digital friend! ✨`;
       </div>
 
       {/* 音频控制按钮 */}
-      <div className="absolute right-4 bottom-4">
+      <div className="absolute right-4 bottom-4 flex items-center gap-3">
+        <span 
+          className="text-[#00ff66] font-['Press_Start_2P'] text-xs tracking-widest"
+          style={{ textShadow: '0 0 5px rgba(0, 255, 102, 0.5)' }}
+        >
+          AUDIO
+        </span>
         <button
           className={`sound-toggle ${soundEnabled ? 'on' : 'off'}`}
           onClick={toggleSound}

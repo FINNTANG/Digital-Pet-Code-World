@@ -185,19 +185,22 @@ const LoginForm = () => {
   // 简化的输入框样式
   const getInputStyle = (fieldName) => ({
     fontFamily: "'VT323', monospace",
-    fontSize: '22px',
-    letterSpacing: '1px',
-    backgroundColor: '#000',
-    border: focusedField === fieldName 
-      ? '2px solid #ffffff' 
-      : '2px solid #00ff00',
+    fontSize: '24px',
+    letterSpacing: '2px',
+    backgroundColor: 'rgba(0, 20, 0, 0.3)',
+    border: 'none',
+    borderBottom: focusedField === fieldName 
+      ? '2px solid #00ff00' 
+      : '2px solid rgba(0, 255, 0, 0.3)',
     color: '#00ff00',
     boxShadow: focusedField === fieldName 
-      ? '0 0 20px rgba(255, 255, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)' 
+      ? '0 10px 20px -10px rgba(0, 255, 0, 0.2)' 
       : 'none',
-    transition: 'all 0.2s ease',
-    padding: '12px 16px',
+    transition: 'all 0.3s ease',
+    padding: '15px 10px',
     outline: 'none',
+    width: '100%',
+    borderRadius: '0'
   });
 
   return (
@@ -207,56 +210,77 @@ const LoginForm = () => {
         rel="stylesheet"
       />
       
-      {/* 简化的背景装饰 - 仅用CSS渐变，不使用Canvas */}
+      {/* 背景装饰 - 网格 */}
       <div style={{
         position: 'fixed',
         inset: 0,
-        background: 'radial-gradient(ellipse at center, rgba(0, 255, 0, 0.03) 0%, transparent 70%)',
+        backgroundImage: `
+          linear-gradient(rgba(0, 50, 0, 0.1) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 50, 0, 0.1) 1px, transparent 1px)
+        `,
+        backgroundSize: '40px 40px',
         pointerEvents: 'none',
+        zIndex: 0
       }} />
       
       <div className="relative z-10 w-full max-w-md px-4">
         {/* 标题 */}
-        <div className="text-center mb-12">
-          <PixelText style={{ 
-            fontSize: '64px',
-            textShadow: '0 0 20px #00ff00, 0 2px 0 rgba(255, 255, 255, 0.2)',
-            letterSpacing: '6px',
-            marginBottom: '20px',
+        <div className="text-center mb-16">
+          <div style={{ 
+            fontSize: '72px',
+            fontFamily: "'VT323', monospace",
+            color: '#00ff00',
+            textShadow: '0 0 15px rgba(0, 255, 0, 0.6), 0 0 30px rgba(0, 255, 0, 0.4)',
+            letterSpacing: '8px',
+            marginBottom: '10px',
+            fontWeight: 'bold'
           }}>
             REALITYEATER
-          </PixelText>
+          </div>
           <div style={{
-            width: '100px',
-            height: '2px',
-            background: 'linear-gradient(90deg, transparent, #00ff00, #ffffff, #00ff00, transparent)',
-            margin: '0 auto 20px',
-          }} />
-          <PixelText style={{ 
-            fontSize: '22px',
-            color: '#ffffff',
-            opacity: 0.9,
-            letterSpacing: '3px',
+            display: 'inline-block',
+            padding: '5px 20px',
+            border: '1px solid rgba(0, 255, 0, 0.3)',
+            backgroundColor: 'rgba(0, 20, 0, 0.5)',
+            borderRadius: '20px'
           }}>
-            {mode === 'login' ? 'SYSTEM LOGIN' : 'USER REGISTRATION'}
-          </PixelText>
+            <PixelText style={{ 
+              fontSize: '18px',
+              color: '#aaffaa',
+              letterSpacing: '4px',
+            }}>
+              {mode === 'login' ? '► SYSTEM ACCESS' : '► NEW USER ENTRY'}
+            </PixelText>
+          </div>
         </div>
 
         {/* 表单容器 */}
         <div 
           style={{
-            backgroundColor: '#000',
-            border: '2px solid #00ff00',
-            borderTop: '2px solid rgba(255, 255, 255, 0.5)',
-            boxShadow: '0 0 40px rgba(0, 255, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-            padding: '40px 30px',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            border: '1px solid #333',
+            boxShadow: '0 0 60px rgba(0, 0, 0, 0.8)',
+            padding: '50px 40px',
+            position: 'relative',
+            backdropFilter: 'blur(10px)'
           }}
         >
-          <form onSubmit={handleSubmit} className="space-y-5">
+          {/* 装饰性边角 */}
+          <div style={{ position: 'absolute', top: '-1px', left: '-1px', width: '20px', height: '20px', borderTop: '2px solid #00ff00', borderLeft: '2px solid #00ff00' }} />
+          <div style={{ position: 'absolute', top: '-1px', right: '-1px', width: '20px', height: '20px', borderTop: '2px solid #00ff00', borderRight: '2px solid #00ff00' }} />
+          <div style={{ position: 'absolute', bottom: '-1px', left: '-1px', width: '20px', height: '20px', borderBottom: '2px solid #00ff00', borderLeft: '2px solid #00ff00' }} />
+          <div style={{ position: 'absolute', bottom: '-1px', right: '-1px', width: '20px', height: '20px', borderBottom: '2px solid #00ff00', borderRight: '2px solid #00ff00' }} />
+
+          <form onSubmit={handleSubmit} className="space-y-8">
             {/* 用户名 */}
-            <div>
-              <PixelText style={{ fontSize: '18px', marginBottom: '8px', opacity: 0.9 }}>
-                {mode === 'login' ? '► USERNAME / EMAIL' : '► USERNAME'}
+            <div className="relative">
+              <PixelText style={{ 
+                fontSize: '16px', 
+                marginBottom: '5px', 
+                opacity: 0.7,
+                transform: 'translateY(5px)' 
+              }}>
+                {mode === 'login' ? 'IDENTITY' : 'USERNAME'}
               </PixelText>
               <input
                 type="text"
@@ -267,15 +291,15 @@ const LoginForm = () => {
                 onBlur={() => setFocusedField('')}
                 required
                 style={getInputStyle('username')}
-                placeholder={mode === 'login' ? 'Enter username or email' : 'Enter username'}
+                placeholder={mode === 'login' ? 'Enter ID...' : 'Choose username...'}
               />
             </div>
 
             {/* 邮箱 */}
             {mode === 'register' && (
-              <div>
-                <PixelText style={{ fontSize: '18px', marginBottom: '8px', opacity: 0.9 }}>
-                  ► EMAIL
+              <div className="relative">
+                <PixelText style={{ fontSize: '16px', marginBottom: '5px', opacity: 0.7 }}>
+                  CONTACT LINK
                 </PixelText>
                 <input
                   type="email"
@@ -286,15 +310,15 @@ const LoginForm = () => {
                   onBlur={() => setFocusedField('')}
                   required
                   style={getInputStyle('email')}
-                  placeholder="Enter email"
+                  placeholder="email@domain.com"
                 />
               </div>
             )}
 
             {/* 密码 */}
-            <div>
-              <PixelText style={{ fontSize: '18px', marginBottom: '8px', opacity: 0.9 }}>
-                ► PASSWORD
+            <div className="relative">
+              <PixelText style={{ fontSize: '16px', marginBottom: '5px', opacity: 0.7 }}>
+                SECURITY KEY
               </PixelText>
               <input
                 type="password"
@@ -305,15 +329,15 @@ const LoginForm = () => {
                 onBlur={() => setFocusedField('')}
                 required
                 style={getInputStyle('password')}
-                placeholder="Enter password"
+                placeholder="••••••••"
               />
             </div>
 
             {/* 确认密码 */}
             {mode === 'register' && (
-              <div>
-                <PixelText style={{ fontSize: '18px', marginBottom: '8px', opacity: 0.9 }}>
-                  ► CONFIRM PASSWORD
+              <div className="relative">
+                <PixelText style={{ fontSize: '16px', marginBottom: '5px', opacity: 0.7 }}>
+                  VERIFY KEY
                 </PixelText>
                 <input
                   type="password"
@@ -324,16 +348,16 @@ const LoginForm = () => {
                   onBlur={() => setFocusedField('')}
                   required
                   style={getInputStyle('password_confirm')}
-                  placeholder="Confirm password"
+                  placeholder="••••••••"
                 />
               </div>
             )}
 
             {/* 手机号 */}
             {mode === 'register' && (
-              <div>
-                <PixelText style={{ fontSize: '18px', marginBottom: '8px', opacity: 0.9 }}>
-                  ► PHONE
+              <div className="relative">
+                <PixelText style={{ fontSize: '16px', marginBottom: '5px', opacity: 0.7 }}>
+                  SIGNAL FREQUENCY
                 </PixelText>
                 <input
                   type="tel"
@@ -344,7 +368,7 @@ const LoginForm = () => {
                   onBlur={() => setFocusedField('')}
                   required
                   style={getInputStyle('phone')}
-                  placeholder="Enter phone"
+                  placeholder="Mobile number"
                 />
               </div>
             )}
@@ -357,23 +381,28 @@ const LoginForm = () => {
                   id="privacyAgreement"
                   checked={agreedToPrivacy}
                   onChange={(e) => setAgreedToPrivacy(e.target.checked)}
-                  className="mt-1 w-5 h-5 cursor-pointer"
-                  style={{ accentColor: '#00ff00' }}
+                  className="mt-1 w-5 h-5 cursor-pointer appearance-none border-2 border-green-500 bg-black checked:bg-green-500"
+                  style={{ 
+                    accentColor: '#00ff00',
+                    position: 'relative'
+                  }}
                 />
                 <label htmlFor="privacyAgreement" className="flex-1 cursor-pointer">
-                  <PixelText style={{ fontSize: '17px', lineHeight: '1.6', opacity: 0.9 }}>
-                    I have read and agree to the{' '}
+                  <PixelText style={{ fontSize: '16px', lineHeight: '1.5', opacity: 0.8 }}>
+                    Initialize protocol: <br/>
+                    I accept the{' '}
                     <a
                       href="/privacy-policy"
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
-                        textDecoration: 'underline',
-                        color: '#ffffff',
+                        textDecoration: 'none',
+                        color: '#fff',
+                        borderBottom: '1px dashed #fff'
                       }}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      Privacy Policy
+                      User Agreement
                     </a>
                   </PixelText>
                 </label>
@@ -384,90 +413,71 @@ const LoginForm = () => {
             <button
               type="submit"
               disabled={loading || (mode === 'register' && !agreedToPrivacy)}
-              className="w-full px-6 py-4 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed mt-6"
+              className="w-full px-6 py-5 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed mt-8 group relative overflow-hidden"
               style={{
                 fontFamily: "'VT323', monospace",
-                fontSize: '28px',
-                letterSpacing: '3px',
+                fontSize: '24px',
+                letterSpacing: '4px',
                 backgroundColor: '#000',
-                border: '3px solid #00ff00',
-                borderTop: '3px solid rgba(255, 255, 255, 0.5)',
+                border: '2px solid #00ff00',
                 color: '#00ff00',
-                boxShadow: '0 0 20px rgba(0, 255, 0, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.1)',
-              }}
-              onMouseEnter={(e) => {
-                if (!loading && !(mode === 'register' && !agreedToPrivacy)) {
-                  e.target.style.backgroundColor = '#00ff00';
-                  e.target.style.color = '#000';
-                  e.target.style.boxShadow = '0 0 40px rgba(255, 255, 255, 0.5)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = '#000';
-                e.target.style.color = '#00ff00';
-                e.target.style.boxShadow = '0 0 20px rgba(0, 255, 0, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.1)';
+                cursor: 'pointer',
+                textTransform: 'uppercase'
               }}
             >
-              {loading ? 'PROCESSING...' : mode === 'login' ? 'LOGIN' : 'REGISTER'}
+              <div className="absolute inset-0 bg-green-500 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out opacity-20"></div>
+              <span className="relative z-10 group-hover:text-white transition-colors duration-300">
+                {loading ? '>>> PROCESSING' : mode === 'login' ? '>>> INITIATE LOGIN' : '>>> EXECUTE REGISTER'}
+              </span>
             </button>
           </form>
 
           {/* 切换和游客按钮 */}
-          <div className="mt-6 space-y-3">
+          <div className="mt-8 space-y-4 border-t border-gray-800 pt-8">
             <button
               onClick={switchMode}
-              className="w-full px-4 py-3 transition-all duration-200"
+              className="w-full px-4 py-2 transition-all duration-200 text-left hover:pl-6"
               style={{
                 fontFamily: "'VT323', monospace",
-                fontSize: '20px',
-                letterSpacing: '2px',
+                fontSize: '18px',
+                color: '#666',
                 backgroundColor: 'transparent',
-                border: '2px solid #00ff00',
-                color: '#00ff00',
+                border: 'none',
+                cursor: 'pointer'
               }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = 'rgba(0, 255, 0, 0.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent';
-              }}
+              onMouseEnter={(e) => e.target.style.color = '#00ff00'}
+              onMouseLeave={(e) => e.target.style.color = '#666'}
             >
-              {mode === 'login' ? 'CREATE NEW ACCOUNT' : 'BACK TO LOGIN'}
+              {mode === 'login' ? '[ CREATE NEW IDENTITY ]' : '[ RETURN TO LOGIN ]'}
             </button>
 
             <button
               onClick={handleGuestMode}
-              className="w-full px-4 py-3 transition-all duration-200"
+              className="w-full px-4 py-2 transition-all duration-200 text-left hover:pl-6"
               style={{
                 fontFamily: "'VT323', monospace",
-                fontSize: '20px',
-                letterSpacing: '2px',
+                fontSize: '18px',
+                color: '#666',
                 backgroundColor: 'transparent',
-                border: '2px solid rgba(255, 255, 255, 0.3)',
-                color: 'rgba(255, 255, 255, 0.7)',
+                border: 'none',
+                cursor: 'pointer'
               }}
-              onMouseEnter={(e) => {
-                e.target.style.borderColor = 'rgba(255, 255, 255, 0.6)';
-                e.target.style.color = '#ffffff';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                e.target.style.color = 'rgba(255, 255, 255, 0.7)';
-              }}
+              onMouseEnter={(e) => e.target.style.color = '#fff'}
+              onMouseLeave={(e) => e.target.style.color = '#666'}
             >
-              CONTINUE AS GUEST
+              [ GUEST ACCESS MODE ]
             </button>
           </div>
         </div>
 
-        {/* 版权信息 */}
-        <div className="text-center mt-8">
+        {/* 底部装饰 */}
+        <div className="text-center mt-12">
           <PixelText style={{ 
             fontSize: '14px', 
-            opacity: 0.5,
-            color: 'rgba(255, 255, 255, 0.5)',
+            opacity: 0.3,
+            letterSpacing: '2px'
           }}>
-            DIGITAL PET CODE WORLD v1.0
+            SECURE CONNECTION ESTABLISHED :: v2.4.0
           </PixelText>
         </div>
       </div>

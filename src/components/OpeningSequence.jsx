@@ -207,9 +207,15 @@ const OpeningSequence = ({ onStartGame }) => {
     },
   ];
 
+  const playClickSound = () => {
+    const audio = new Audio('/cha.mp3');
+    audio.volume = 0.5;
+    audio.play().catch(e => console.log('Audio play failed:', e));
+  };
+
   const handlePetSelect = (pet) => {
     if (!isTransitioning) {
-      SoundEffect.playClick();
+      playClickSound();
       setIsTransitioning(true);
       setSelectedPet(pet);
       setFadeOutPrompt(true);
@@ -228,7 +234,7 @@ const OpeningSequence = ({ onStartGame }) => {
 
   const handleNameSubmit = () => {
     if (customName.trim() && !isTransitioning) {
-      SoundEffect.playClick();
+      playClickSound();
       setIsTransitioning(true);
       
       // 保存宠物信息
@@ -249,6 +255,8 @@ const OpeningSequence = ({ onStartGame }) => {
 
   const handleInitialize = () => {
     if (!isTransitioning) {
+      // 移除这里的音效，因为这是自动或文字打完后的效果，或者也可以加
+      // playClickSound(); 
       setIsTransitioning(true);
       setFadeOutTitle(true);
 
@@ -263,7 +271,7 @@ const OpeningSequence = ({ onStartGame }) => {
 
   const handlePlay = () => {
     if (selectedPet && customName.trim()) {
-      SoundEffect.playClick();
+      playClickSound();
       onStartGame();
       navigate('/game');
     }
@@ -344,10 +352,10 @@ const OpeningSequence = ({ onStartGame }) => {
                 onClick={() => handlePetSelect(pet)}
                 onMouseEnter={() => setHoveredPet(pet.type)}
                 onMouseLeave={() => setHoveredPet(null)}
-                className="group relative transition-all duration-300"
+                className="group relative transition-all duration-300 active:scale-95"
                 style={{
                   fontFamily: "'VT323', monospace",
-                  cursor: 'pointer',
+                  cursor: 'pointer', // 将被全局光标覆盖
                   background: 'transparent',
                   border: 'none',
                   padding: 0,
@@ -357,233 +365,271 @@ const OpeningSequence = ({ onStartGame }) => {
                   animation: `smoothFadeIn 0.8s ease-out ${index * 0.15}s both`,
                 }}
               >
-                {/* 电子宠物机外壳 */}
+                {/* 电子宠物机外壳 - 半透明青色冰晶风格 */}
                 <div
                   style={{
                     width: '280px',
                     height: '360px',
+                    // 调整为更深邃、不透明度更高的青色渐变，贴合黑客帝国风格
                     background: `
                       linear-gradient(135deg, 
-                        rgba(0, 26, 0, 0.95) 0%, 
-                        rgba(0, 51, 0, 1) 20%,
-                        rgba(0, 51, 0, 1) 80%,
-                        rgba(0, 26, 0, 0.95) 100%
+                        rgba(0, 20, 20, 0.9) 0%, 
+                        rgba(0, 40, 40, 0.85) 20%, 
+                        rgba(0, 60, 60, 0.8) 50%, 
+                        rgba(0, 40, 40, 0.85) 80%, 
+                        rgba(0, 20, 20, 0.9) 100%
                       )
                     `,
-                    border: '4px solid #00ff00',
-                    borderRadius: '50px 50px 30px 30px',
+                    border: '1px solid rgba(0, 255, 128, 0.3)',
+                    borderRadius: '60px 60px 40px 40px',
                     position: 'relative',
                     boxShadow: `
-                      inset 3px 3px 8px rgba(0, 255, 0, 0.25),
-                      inset -3px -3px 8px rgba(0, 80, 0, 0.6),
-                      0 2px 0 rgba(0, 180, 0, 0.4),
-                      0 8px 0 rgba(0, 100, 0, 0.6),
-                      0 12px 25px rgba(0, 0, 0, 0.6),
-                      0 0 0 1px rgba(0, 255, 0, 0.1)
+                      /* 内部高光 */
+                      inset 2px 2px 6px rgba(200, 255, 220, 0.3),
+                      inset -2px -2px 6px rgba(0, 20, 20, 0.8),
+                      /* 外部光晕 - 绿色科技感 */
+                      0 0 15px rgba(0, 255, 128, 0.2),
+                      0 20px 50px rgba(0, 0, 0, 0.9)
                     `,
+                    backdropFilter: 'blur(10px)',
+                    overflow: 'hidden'
                   }}
                 >
-                  {/* 顶部挂绳孔 */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: '-16px',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      width: '24px',
-                      height: '24px',
-                      background: 'radial-gradient(circle at 35% 35%, #002200, #000800)',
-                      border: '3px solid #00ff00',
-                      borderRadius: '50%',
-                      boxShadow: `
-                        inset 0 3px 6px rgba(0, 0, 0, 0.9),
-                        inset 0 -1px 2px rgba(0, 255, 0, 0.2),
-                        0 2px 4px rgba(0, 0, 0, 0.5)
-                      `,
-                    }}
-                  >
-                    {/* 内圈孔洞效果 */}
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: '10px',
-                        height: '10px',
-                        background: '#000',
-                        borderRadius: '50%',
-                        boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 1)',
-                      }}
-                    />
-                </div>
+                  {/* 内部电路板纹理暗示 - 已去除斜线 */}
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: `
+                      radial-gradient(circle at 30% 70%, rgba(0, 255, 128, 0.05) 0%, transparent 40%)
+                    `,
+                    zIndex: 0,
+                    pointerEvents: 'none'
+                  }} />
 
-                  {/* 品牌标识 */}
-                <div
-                  style={{
-                      position: 'absolute',
-                      top: '12px',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      fontSize: '11px',
-                      color: '#00ff00',
-                      letterSpacing: '1px',
-                      opacity: 0.7,
-                      textShadow: '0 0 3px #00ff00',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    DIGITAL-PET™
-                  </div>
+                  {/* 顶部装饰线条 */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '30px',
+                    left: '20px',
+                    right: '20px',
+                    height: '2px',
+                    background: 'rgba(0, 255, 128, 0.2)',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
+                  }} />
 
-                  {/* LCD屏幕区域 */}
+                  {/* 品牌标识区 */}
                   <div
                     style={{
                       position: 'absolute',
                       top: '45px',
                       left: '50%',
                       transform: 'translateX(-50%)',
-                      width: '220px',
-                      height: '200px',
-                      background: `
-                        linear-gradient(180deg, 
-                          #8B9B7D 0%, 
-                          #A8B89C 15%,
-                          #B5C5A8 50%,
-                          #A8B89C 85%,
-                          #8B9B7D 100%
-                        )
-                      `,
-                      border: '3px solid #00ff00',
-                      borderRadius: '8px',
-                      boxShadow: `
-                        inset 3px 3px 6px rgba(0, 0, 0, 0.4),
-                        inset -2px -2px 4px rgba(255, 255, 255, 0.15),
-                        0 0 12px rgba(0, 255, 0, 0.25),
-                        0 2px 0 rgba(0, 150, 0, 0.3)
-                      `,
-                      overflow: 'hidden',
+                      width: '180px',
+                      height: '24px',
+                      background: 'rgba(0, 20, 20, 0.8)',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1px solid rgba(0, 255, 128, 0.2)',
+                      boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.5)'
                     }}
                   >
-                    {/* LCD扫描线效果 */}
                     <div
                       style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        background: 'repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.08) 0px, rgba(0, 0, 0, 0.08) 2px, transparent 2px, transparent 4px)',
-                        pointerEvents: 'none',
-                        zIndex: 2,
-                      }}
-                    />
-
-                    {/* 宠物类型标签 - 在屏幕顶部 */}
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: '10px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        fontSize: '24px',
-                        color: '#1a1a1a',
-                    letterSpacing: '2px',
-                    fontWeight: '700',
-                        textShadow: '1px 1px 0 rgba(255, 255, 255, 0.3)',
-                        zIndex: 1,
-                        whiteSpace: 'nowrap',
-                  }}
-                >
-                      {pet.displayName.toUpperCase()}
-                </div>
-
-                    {/* 宠物GIF - 在屏幕中央 */}
-                <div
-                  style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1,
+                        fontSize: '14px',
+                        color: '#00ff80',
+                        letterSpacing: '2px',
+                        fontWeight: 'bold',
+                        textShadow: '0 0 5px rgba(0, 255, 128, 0.5)',
+                        fontFamily: "'VT323', monospace"
                       }}
                     >
-                      <img
-                        src={pet.gifPath}
-                        alt={pet.displayName}
-                        style={{
-                          width: '140px',
-                          height: '140px',
-                          objectFit: 'contain',
-                          imageRendering: 'pixelated',
-                          filter: 'brightness(0.85) contrast(1.1)',
-                        }}
-                      />
+                      DIGITAL-PET™
                     </div>
                   </div>
 
-                  {/* 装饰性按键 - 简洁单键设计 */}
+                  {/* 屏幕区域 */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '85px',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      width: '220px',
+                      height: '180px',
+                      background: '#0a0a0a',
+                      borderRadius: '25px 25px 45px 25px',
+                      boxShadow: `
+                        0 5px 15px rgba(0,0,0,0.6),
+                        inset 0 0 0 1px rgba(0, 255, 128, 0.15)
+                      `,
+                      padding: '15px',
+                      boxSizing: 'border-box',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      zIndex: 1
+                    }}
+                  >
+                    {/* 屏幕周围装饰 */}
+                    <div style={{
+                      position: 'absolute',
+                      top: '5px', left: '5px', right: '5px', bottom: '5px',
+                      border: '1px dashed rgba(0, 255, 128, 0.2)',
+                      borderRadius: '20px 20px 40px 20px',
+                      pointerEvents: 'none'
+                    }} />
+
+                    {/* 液晶屏幕本体 */}
+                    <div style={{
+                      width: '140px',
+                      height: '140px',
+                      background: '#8bac95', // 保持经典 GameBoy 屏幕底色，但稍微调亮一点点
+                      borderRadius: '8px',
+                      position: 'relative',
+                      boxShadow: 'inset 2px 2px 8px rgba(0,0,0,0.4)',
+                      overflow: 'hidden',
+                      border: '2px solid #000'
+                    }}>
+                      {/* LCD像素网格 - 降低不透明度 */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          background: `
+                            linear-gradient(rgba(0, 0, 0, 0.03) 50%, transparent 50%),
+                            linear-gradient(90deg, rgba(0, 0, 0, 0.03) 50%, transparent 50%)
+                          `,
+                          backgroundSize: '3px 3px',
+                          pointerEvents: 'none',
+                          zIndex: 2,
+                          opacity: 0.4
+                        }}
+                      />
+                      
+                      {/* 屏幕暗角 */}
+                      <div style={{
+                        position: 'absolute',
+                        inset: 0,
+                        boxShadow: 'inset 0 0 15px rgba(0,0,0,0.15)',
+                        pointerEvents: 'none',
+                        zIndex: 3
+                      }} />
+
+                      {/* 宠物类型标签 */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: '8px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          fontSize: '18px',
+                          color: '#1a1a1a',
+                          letterSpacing: '2px',
+                          fontWeight: '900',
+                          zIndex: 1,
+                          opacity: 0.7,
+                          fontFamily: "'VT323', monospace"
+                        }}
+                      >
+                        {pet.displayName.toUpperCase()}
+                      </div>
+
+                      {/* 宠物GIF - 移除让宠物变黑的滤镜 */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: '55%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          zIndex: 1,
+                          // 只保留像素化渲染，移除变色滤镜
+                          imageRendering: 'pixelated'
+                        }}
+                      >
+                        <img
+                          src={pet.gifPath}
+                          alt={pet.displayName}
+                          style={{
+                            width: '90px',
+                            height: '90px',
+                            objectFit: 'contain',
+                            imageRendering: 'pixelated',
+                            // 轻微增加对比度，使其在LCD背景上更清晰
+                            filter: 'contrast(1.1)'
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 控制区装饰 */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '70px',
+                    left: '30px',
+                    display: 'flex',
+                    gap: '8px'
+                  }}>
+                    {[1, 2, 3].map(i => (
+                      <div key={i} style={{
+                        width: '4px',
+                        height: '12px',
+                        background: 'rgba(0, 20, 20, 0.6)',
+                        borderRadius: '2px',
+                        boxShadow: '0 1px 0 rgba(0, 255, 128, 0.1)'
+                      }}/>
+                    ))}
+                  </div>
+
+                  {/* 主按键 - 统一为绿色系 */}
                   <div
                       style={{
                       position: 'absolute',
-                      bottom: '35px',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
+                      bottom: '30px',
+                      right: '30px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
                   >
-                    {/* 中央圆形按键 */}
                     <div
                       style={{
-                        width: '45px',
-                        height: '45px',
-                        background: 'radial-gradient(circle at 35% 35%, #004400, #001a00)',
-                        border: '3px solid #00ff00',
+                        width: '50px',
+                        height: '50px',
+                        background: 'radial-gradient(circle at 30% 30%, #00ff88, #008844)',
                         borderRadius: '50%',
                         boxShadow: `
-                          inset 0 3px 6px rgba(0, 0, 0, 0.7),
-                          inset 0 -2px 4px rgba(0, 255, 0, 0.15),
-                          0 3px 0 rgba(0, 120, 0, 0.6),
-                          0 1px 0 rgba(0, 200, 0, 0.3)
+                          0 4px 0 #004422,
+                          0 8px 15px rgba(0,0,0,0.6),
+                          inset 2px 2px 6px rgba(255,255,255,0.4)
                         `,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
+                        border: '1px solid rgba(0,0,0,0.3)'
                       }}
-                    >
-                      {/* 按键中心点 */}
-                      <div
-                        style={{
-                          width: '18px',
-                          height: '18px',
-                          background: 'radial-gradient(circle at 40% 40%, #00ff00, #00aa00)',
-                          borderRadius: '50%',
-                          boxShadow: `
-                            0 0 4px rgba(0, 255, 0, 0.6),
-                            0 0 8px rgba(0, 255, 0, 0.3),
-                            inset 0 1px 2px rgba(255, 255, 255, 0.3)
-                          `,
-                        }}
-                      />
-                    </div>
+                    />
                   </div>
 
-                  {/* 选择提示 - 始终占位，控制可见性 */}
+                  {/* 选择提示 */}
                   <div
                     style={{
                       position: 'absolute',
-                      bottom: '-35px',
+                      bottom: '-40px',
                       left: '50%',
                       transform: 'translateX(-50%)',
                       fontSize: '16px',
-                      color: '#ffffff',
+                      color: '#00ff80',
                       letterSpacing: '2px',
-                      textShadow: '0 0 10px rgba(255, 255, 255, 0.8), 0 0 5px #00ff00',
+                      textShadow: '0 0 10px rgba(0, 255, 128, 0.8)',
                       whiteSpace: 'nowrap',
                       opacity: hoveredPet === pet.type ? 1 : 0,
                       transition: 'opacity 0.3s ease',
@@ -621,207 +667,253 @@ const OpeningSequence = ({ onStartGame }) => {
             <div
               style={{
                 width: '280px',
-                height: '320px',
+                height: '360px',
                 background: `
                   linear-gradient(135deg, 
-                    rgba(0, 26, 0, 0.95) 0%, 
-                    rgba(0, 51, 0, 1) 20%,
-                    rgba(0, 51, 0, 1) 80%,
-                    rgba(0, 26, 0, 0.95) 100%
+                    rgba(0, 20, 20, 0.9) 0%, 
+                    rgba(0, 40, 40, 0.85) 20%, 
+                    rgba(0, 60, 60, 0.8) 50%, 
+                    rgba(0, 40, 40, 0.85) 80%, 
+                    rgba(0, 20, 20, 0.9) 100%
                   )
                 `,
-                border: '4px solid #00ff00',
-                borderRadius: '50px 50px 30px 30px',
+                border: '1px solid rgba(0, 255, 128, 0.3)',
+                borderRadius: '60px 60px 40px 40px',
                 position: 'relative',
                 boxShadow: `
-                  inset 3px 3px 8px rgba(0, 255, 0, 0.25),
-                  inset -3px -3px 8px rgba(0, 80, 0, 0.6),
-                  0 2px 0 rgba(0, 180, 0, 0.4),
-                  0 8px 0 rgba(0, 100, 0, 0.6),
-                  0 12px 25px rgba(0, 0, 0, 0.6)
+                  inset 2px 2px 6px rgba(200, 255, 220, 0.3),
+                  inset -2px -2px 6px rgba(0, 20, 20, 0.8),
+                  0 0 15px rgba(0, 255, 128, 0.2),
+                  0 20px 50px rgba(0, 0, 0, 0.9)
                 `,
+                backdropFilter: 'blur(10px)',
+                overflow: 'hidden'
               }}
             >
-              {/* 顶部挂绳孔 */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '-16px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: '24px',
-                  height: '24px',
-                  background: 'radial-gradient(circle at 35% 35%, #002200, #000800)',
-                  border: '3px solid #00ff00',
-                  borderRadius: '50%',
-                  boxShadow: `
-                    inset 0 3px 6px rgba(0, 0, 0, 0.9),
-                    inset 0 -1px 2px rgba(0, 255, 0, 0.2),
-                    0 2px 4px rgba(0, 0, 0, 0.5)
-                  `,
-                }}
-              >
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: '10px',
-                    height: '10px',
-                    background: '#000',
-                    borderRadius: '50%',
-                    boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 1)',
-                  }}
-                />
-              </div>
+              {/* 内部电路板纹理暗示 */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: `
+                  radial-gradient(circle at 30% 70%, rgba(0, 255, 128, 0.05) 0%, transparent 40%)
+                `,
+                zIndex: 0,
+                pointerEvents: 'none'
+              }} />
+
+              {/* 顶部装饰线条 */}
+              <div style={{
+                position: 'absolute',
+                top: '30px',
+                left: '20px',
+                right: '20px',
+                height: '2px',
+                background: 'rgba(0, 255, 128, 0.2)',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
+              }} />
 
               {/* 品牌标识 */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '12px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  fontSize: '9px',
-                  color: '#00ff00',
-                  letterSpacing: '0.5px',
-                  opacity: 0.7,
-                  textShadow: '0 0 3px #00ff00',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                DIGITAL-PET™
-              </div>
-
-              {/* LCD屏幕 */}
               <div
                 style={{
                   position: 'absolute',
                   top: '45px',
                   left: '50%',
                   transform: 'translateX(-50%)',
-                  width: '220px',
-                  height: '200px',
-                  background: `
-                    linear-gradient(180deg, 
-                      #8B9B7D 0%, 
-                      #A8B89C 15%,
-                      #B5C5A8 50%,
-                      #A8B89C 85%,
-                      #8B9B7D 100%
-                    )
-                  `,
-                  border: '3px solid #00ff00',
-                  borderRadius: '8px',
-                  boxShadow: `
-                    inset 3px 3px 6px rgba(0, 0, 0, 0.4),
-                    inset -2px -2px 4px rgba(255, 255, 255, 0.15),
-                    0 0 12px rgba(0, 255, 0, 0.25)
-                  `,
-                  overflow: 'hidden',
+                  width: '180px',
+                  height: '24px',
+                  background: 'rgba(0, 20, 20, 0.8)',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid rgba(0, 255, 128, 0.2)',
+                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.5)'
                 }}
               >
-                {/* LCD扫描线 */}
                 <div
                   style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    background: 'repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.08) 0px, rgba(0, 0, 0, 0.08) 2px, transparent 2px, transparent 4px)',
-                    pointerEvents: 'none',
-                    zIndex: 2,
-                  }}
-                />
-
-                {/* 宠物类型 */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '10px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    fontSize: '22px',
-                    color: '#1a1a1a',
+                    fontSize: '14px',
+                    color: '#00ff80',
                     letterSpacing: '2px',
-                    fontWeight: '700',
-                    textShadow: '1px 1px 0 rgba(255, 255, 255, 0.3)',
-                    zIndex: 1,
-                    whiteSpace: 'nowrap',
+                    fontWeight: 'bold',
+                    textShadow: '0 0 5px rgba(0, 255, 128, 0.5)',
+                    fontFamily: "'VT323', monospace"
                   }}
                 >
-                  {selectedPet.displayName.toUpperCase()}
-                </div>
-
-                {/* 宠物GIF */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1,
-                  }}
-                >
-                  <img
-                    src={selectedPet.gifPath}
-                    alt={selectedPet.displayName}
-                    style={{
-                      width: '140px',
-                      height: '140px',
-                      objectFit: 'contain',
-                      imageRendering: 'pixelated',
-                      filter: 'brightness(0.85) contrast(1.1)',
-                    }}
-                  />
+                  DIGITAL-PET™
                 </div>
               </div>
 
-              {/* 装饰按键 */}
+              {/* LCD屏幕 */}
               <div
                 style={{
                   position: 'absolute',
-                  bottom: '15px',
+                  top: '85px',
                   left: '50%',
                   transform: 'translateX(-50%)',
+                  width: '220px',
+                  height: '180px',
+                  background: '#0a0a0a',
+                  borderRadius: '25px 25px 45px 25px',
+                  boxShadow: `
+                    0 5px 15px rgba(0,0,0,0.6),
+                    inset 0 0 0 1px rgba(0, 255, 128, 0.15)
+                  `,
+                  padding: '15px',
+                  boxSizing: 'border-box',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  zIndex: 1
+                }}
+              >
+                {/* 屏幕装饰纹理 */}
+                <div style={{
+                  position: 'absolute',
+                  top: '5px', left: '5px', right: '5px', bottom: '5px',
+                  border: '1px dashed rgba(0, 255, 128, 0.2)',
+                  borderRadius: '20px 20px 40px 20px',
+                  pointerEvents: 'none'
+                }} />
+
+                {/* 屏幕玻璃层 */}
+                <div style={{
+                  width: '140px',
+                  height: '140px',
+                  background: '#8bac95',
+                  borderRadius: '8px',
+                  position: 'relative',
+                  boxShadow: 'inset 2px 2px 8px rgba(0,0,0,0.4)',
+                  overflow: 'hidden',
+                  border: '2px solid #000'
+                }}>
+                  {/* LCD像素网格 */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      background: `
+                        linear-gradient(rgba(0, 0, 0, 0.03) 50%, transparent 50%),
+                        linear-gradient(90deg, rgba(0, 0, 0, 0.03) 50%, transparent 50%)
+                      `,
+                      backgroundSize: '3px 3px',
+                      pointerEvents: 'none',
+                      zIndex: 2,
+                      opacity: 0.4
+                    }}
+                  />
+                  
+                  {/* 屏幕反光 */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '-50%',
+                    left: '-50%',
+                    width: '200%',
+                    height: '200%',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 40%)',
+                    pointerEvents: 'none',
+                    zIndex: 3
+                  }}/>
+
+                  {/* 宠物类型 */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '8px',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      fontSize: '18px',
+                      color: '#1a1a1a',
+                      letterSpacing: '2px',
+                      fontWeight: '900',
+                      zIndex: 1,
+                      opacity: 0.7,
+                      fontFamily: "'VT323', monospace",
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {selectedPet.displayName.toUpperCase()}
+                  </div>
+
+                  {/* 宠物GIF */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '55%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      zIndex: 1,
+                      imageRendering: 'pixelated'
+                    }}
+                  >
+                    <img
+                      src={selectedPet.gifPath}
+                      alt={selectedPet.displayName}
+                      style={{
+                        width: '90px',
+                        height: '90px',
+                        objectFit: 'contain',
+                        imageRendering: 'pixelated',
+                        filter: 'contrast(1.1)'
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 控制区装饰 */}
+              <div style={{
+                position: 'absolute',
+                bottom: '70px',
+                left: '30px',
+                display: 'flex',
+                gap: '8px'
+              }}>
+                {[1, 2, 3].map(i => (
+                  <div key={i} style={{
+                    width: '4px',
+                    height: '12px',
+                    background: 'rgba(0, 20, 20, 0.6)',
+                    borderRadius: '2px',
+                    boxShadow: '0 1px 0 rgba(0, 255, 128, 0.1)'
+                  }}/>
+                ))}
+              </div>
+
+              {/* 主按键 - 绿色 */}
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '30px',
+                  right: '30px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
                 <div
                   style={{
-                    width: '45px',
-                    height: '45px',
-                    background: 'radial-gradient(circle at 35% 35%, #004400, #001a00)',
-                    border: '3px solid #00ff00',
+                    width: '50px',
+                    height: '50px',
+                    background: 'radial-gradient(circle at 30% 30%, #00ff88, #008844)',
                     borderRadius: '50%',
                     boxShadow: `
-                      inset 0 3px 6px rgba(0, 0, 0, 0.7),
-                      inset 0 -2px 4px rgba(0, 255, 0, 0.15),
-                      0 3px 0 rgba(0, 120, 0, 0.6)
+                      0 4px 0 #004422,
+                      0 8px 15px rgba(0,0,0,0.6),
+                      inset 2px 2px 6px rgba(255,255,255,0.4)
                     `,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    border: '1px solid rgba(0,0,0,0.3)'
                   }}
-                >
-                  <div
-                    style={{
-                      width: '18px',
-                      height: '18px',
-                      background: 'radial-gradient(circle at 40% 40%, #00ff00, #00aa00)',
-                      borderRadius: '50%',
-                      boxShadow: `
-                        0 0 4px rgba(0, 255, 0, 0.6),
-                        0 0 8px rgba(0, 255, 0, 0.3),
-                        inset 0 1px 2px rgba(255, 255, 255, 0.3)
-                      `,
-                    }}
-                  />
-                </div>
+                />
               </div>
             </div>
 
@@ -984,213 +1076,260 @@ const OpeningSequence = ({ onStartGame }) => {
             <div
               style={{
                 width: '300px',
-                height: '340px',
+                height: '380px',
                 background: `
                   linear-gradient(135deg, 
-                    rgba(0, 26, 0, 0.95) 0%, 
-                    rgba(0, 51, 0, 1) 20%,
-                    rgba(0, 51, 0, 1) 80%,
-                    rgba(0, 26, 0, 0.95) 100%
+                    rgba(0, 20, 20, 0.9) 0%, 
+                    rgba(0, 40, 40, 0.85) 20%, 
+                    rgba(0, 60, 60, 0.8) 50%, 
+                    rgba(0, 40, 40, 0.85) 80%, 
+                    rgba(0, 20, 20, 0.9) 100%
                   )
                 `,
-                border: '4px solid #00ff00',
-                borderRadius: '50px 50px 30px 30px',
+                border: '1px solid rgba(0, 255, 128, 0.3)',
+                borderRadius: '60px 60px 40px 40px',
                 position: 'relative',
                 boxShadow: `
-                  inset 3px 3px 8px rgba(0, 255, 0, 0.25),
-                  inset -3px -3px 8px rgba(0, 80, 0, 0.6),
-                  0 2px 0 rgba(0, 180, 0, 0.4),
-                  0 8px 0 rgba(0, 100, 0, 0.6),
-                  0 12px 25px rgba(0, 0, 0, 0.6),
-                  0 0 30px rgba(0, 255, 0, 0.2)
+                  inset 2px 2px 6px rgba(200, 255, 220, 0.3),
+                  inset -2px -2px 6px rgba(0, 20, 20, 0.8),
+                  0 0 30px rgba(0, 255, 128, 0.3), /* 激活状态的更强绿色光晕 */
+                  0 20px 60px rgba(0, 0, 0, 0.9)
                 `,
+                backdropFilter: 'blur(10px)',
+                overflow: 'hidden'
               }}
             >
-              {/* 顶部挂绳孔 */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '-16px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: '24px',
-                  height: '24px',
-                  background: 'radial-gradient(circle at 35% 35%, #002200, #000800)',
-                  border: '3px solid #00ff00',
-                  borderRadius: '50%',
-                  boxShadow: `
-                    inset 0 3px 6px rgba(0, 0, 0, 0.9),
-                    inset 0 -1px 2px rgba(0, 255, 0, 0.2),
-                    0 2px 4px rgba(0, 0, 0, 0.5)
-                  `,
-                }}
-              >
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: '10px',
-                    height: '10px',
-                    background: '#000',
-                    borderRadius: '50%',
-                    boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 1)',
-                  }}
-                />
-              </div>
+              {/* 内部电路板纹理暗示 */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: `
+                  radial-gradient(circle at 30% 70%, rgba(0, 255, 128, 0.05) 0%, transparent 40%)
+                `,
+                zIndex: 0,
+                pointerEvents: 'none'
+              }} />
+
+              {/* 顶部装饰线条 */}
+              <div style={{
+                position: 'absolute',
+                top: '30px',
+                left: '20px',
+                right: '20px',
+                height: '2px',
+                background: 'rgba(0, 255, 128, 0.2)',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
+              }} />
 
               {/* 品牌标识 */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '12px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  fontSize: '9px',
-                  color: '#00ff00',
-                  letterSpacing: '0.5px',
-                  opacity: 0.7,
-                  textShadow: '0 0 3px #00ff00',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                DIGITAL-PET™
-              </div>
-
-              {/* LCD屏幕 */}
               <div
                 style={{
                   position: 'absolute',
                   top: '45px',
                   left: '50%',
                   transform: 'translateX(-50%)',
-                  width: '240px',
-                  height: '220px',
-                  background: `
-                    linear-gradient(180deg, 
-                      #8B9B7D 0%, 
-                      #A8B89C 15%,
-                      #B5C5A8 50%,
-                      #A8B89C 85%,
-                      #8B9B7D 100%
-                    )
-                  `,
-                  border: '3px solid #00ff00',
-                  borderRadius: '8px',
-                  boxShadow: `
-                    inset 3px 3px 6px rgba(0, 0, 0, 0.4),
-                    inset -2px -2px 4px rgba(255, 255, 255, 0.15),
-                    0 0 15px rgba(0, 255, 0, 0.3)
-                  `,
-                  overflow: 'hidden',
+                  width: '180px',
+                  height: '24px',
+                  background: 'rgba(0, 20, 20, 0.8)',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid rgba(0, 255, 128, 0.2)',
+                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.5)'
                 }}
               >
-                {/* LCD扫描线 */}
                 <div
                   style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    background: 'repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.08) 0px, rgba(0, 0, 0, 0.08) 2px, transparent 2px, transparent 4px)',
-                    pointerEvents: 'none',
-                    zIndex: 2,
-                  }}
-                />
-
-                {/* 宠物类型和名字 */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '10px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    fontSize: '20px',
-                    color: '#1a1a1a',
-                    letterSpacing: '1px',
-                    fontWeight: '700',
-                    textShadow: '1px 1px 0 rgba(255, 255, 255, 0.3)',
-                    zIndex: 1,
-                    maxWidth: '220px',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    padding: '0 10px',
+                    fontSize: '14px',
+                    color: '#00ff80',
+                    letterSpacing: '2px',
+                    fontWeight: 'bold',
+                    textShadow: '0 0 5px rgba(0, 255, 128, 0.5)',
+                    fontFamily: "'VT323', monospace"
                   }}
                 >
-                  {customName}
-                </div>
-
-                {/* 宠物GIF */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '52%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1,
-                  }}
-                >
-                  <img
-                    src={selectedPet.gifPath}
-                    alt={selectedPet.displayName}
-                    style={{
-                      width: '160px',
-                      height: '160px',
-                      objectFit: 'contain',
-                      imageRendering: 'pixelated',
-                      filter: 'brightness(0.85) contrast(1.1)',
-                    }}
-                  />
+                  DIGITAL-PET™
                 </div>
               </div>
 
-              {/* 装饰按键 */}
+              {/* LCD屏幕 */}
               <div
                 style={{
                   position: 'absolute',
-                  bottom: '18px',
+                  top: '85px',
                   left: '50%',
                   transform: 'translateX(-50%)',
+                  width: '240px',
+                  height: '200px',
+                  background: '#0a0a0a',
+                  borderRadius: '25px 25px 45px 25px',
+                  boxShadow: `
+                    0 5px 15px rgba(0,0,0,0.6),
+                    inset 0 0 0 1px rgba(0, 255, 128, 0.15)
+                  `,
+                  padding: '15px',
+                  boxSizing: 'border-box',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  zIndex: 1
+                }}
+              >
+                {/* 屏幕装饰纹理 */}
+                <div style={{
+                  position: 'absolute',
+                  top: '5px', left: '5px', right: '5px', bottom: '5px',
+                  border: '1px dashed rgba(0, 255, 128, 0.2)',
+                  borderRadius: '20px 20px 40px 20px',
+                  pointerEvents: 'none'
+                }} />
+
+                {/* 屏幕玻璃层 */}
+                <div style={{
+                  width: '140px',
+                  height: '140px',
+                  background: '#8bac95',
+                  borderRadius: '8px',
+                  position: 'relative',
+                  boxShadow: 'inset 2px 2px 8px rgba(0,0,0,0.4)',
+                  overflow: 'hidden',
+                  border: '2px solid #000'
+                }}>
+                  {/* LCD像素网格 */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      background: `
+                        linear-gradient(rgba(0, 0, 0, 0.03) 50%, transparent 50%),
+                        linear-gradient(90deg, rgba(0, 0, 0, 0.03) 50%, transparent 50%)
+                      `,
+                      backgroundSize: '3px 3px',
+                      pointerEvents: 'none',
+                      zIndex: 2,
+                      opacity: 0.4
+                    }}
+                  />
+                  
+                  {/* 屏幕反光 */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '-50%',
+                    left: '-50%',
+                    width: '200%',
+                    height: '200%',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 40%)',
+                    pointerEvents: 'none',
+                    zIndex: 3
+                  }}/>
+
+                  {/* 宠物名字 */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '15px',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      fontSize: '22px',
+                      color: '#1a1a1a',
+                      letterSpacing: '1px',
+                      fontWeight: '900',
+                      zIndex: 1,
+                      maxWidth: '200px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      padding: '0 10px',
+                      textAlign: 'center',
+                      fontFamily: "'VT323', monospace"
+                    }}
+                  >
+                    {customName}
+                  </div>
+
+                  {/* 宠物GIF */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '58%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      zIndex: 1,
+                      // 修复过暗问题：仅保留像素化，移除其他滤镜
+                      imageRendering: 'pixelated'
+                    }}
+                  >
+                    <img
+                      src={selectedPet.gifPath}
+                      alt={selectedPet.displayName}
+                      style={{
+                        width: '120px',
+                        height: '120px',
+                        objectFit: 'contain',
+                        imageRendering: 'pixelated',
+                        filter: 'contrast(1.1)'
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 控制区装饰 */}
+              <div style={{
+                position: 'absolute',
+                bottom: '75px',
+                left: '35px',
+                display: 'flex',
+                gap: '10px'
+              }}>
+                {[1, 2, 3].map(i => (
+                  <div key={i} style={{
+                    width: '4px',
+                    height: '15px',
+                    background: 'rgba(0, 20, 20, 0.6)',
+                    borderRadius: '2px',
+                    boxShadow: '0 1px 0 rgba(0, 255, 128, 0.1)'
+                  }}/>
+                ))}
+              </div>
+
+              {/* 主按键 - 绿色激活态 */}
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '35px',
+                  right: '35px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
                 <div
                   style={{
-                    width: '48px',
-                    height: '48px',
-                    background: 'radial-gradient(circle at 35% 35%, #004400, #001a00)',
-                    border: '3px solid #00ff00',
+                    width: '55px',
+                    height: '55px',
+                    // 荧光绿色渐变
+                    background: 'radial-gradient(circle at 30% 30%, #00ff88, #008844)',
                     borderRadius: '50%',
                     boxShadow: `
-                      inset 0 3px 6px rgba(0, 0, 0, 0.7),
-                      inset 0 -2px 4px rgba(0, 255, 0, 0.15),
-                      0 3px 0 rgba(0, 120, 0, 0.6),
-                      0 0 8px rgba(0, 255, 0, 0.2)
+                      0 4px 0 #004422,
+                      0 8px 15px rgba(0,0,0,0.6),
+                      inset 2px 2px 6px rgba(255,255,255,0.4),
+                      0 0 20px rgba(0,255,100,0.4)
                     `,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    border: '1px solid rgba(0,0,0,0.3)'
                   }}
-                >
-                  <div
-                    style={{
-                      width: '20px',
-                      height: '20px',
-                      background: 'radial-gradient(circle at 40% 40%, #00ff00, #00aa00)',
-                      borderRadius: '50%',
-                      boxShadow: `
-                        0 0 4px rgba(0, 255, 0, 0.6),
-                        0 0 10px rgba(0, 255, 0, 0.4),
-                        inset 0 1px 2px rgba(255, 255, 255, 0.3)
-                      `,
-                    }}
-                  />
-                </div>
+                />
               </div>
             </div>
 
@@ -1237,7 +1376,6 @@ const OpeningSequence = ({ onStartGame }) => {
       </div>
 
       <style jsx global>{`
-
         @keyframes smoothFadeIn {
           from {
             opacity: 0;
