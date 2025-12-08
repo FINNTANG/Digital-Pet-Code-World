@@ -118,8 +118,11 @@ const CustomCursor = () => {
   return (
     <>
       <style>{`
-        body, a, button, input, select, textarea, [role="button"] {
-          cursor: none !important;
+        /* 只在非触摸设备上隐藏系统光标 */
+        @media (hover: hover) and (pointer: fine) {
+          body, a, button, input, select, textarea, [role="button"] {
+            cursor: none !important;
+          }
         }
         
         .custom-cursor {

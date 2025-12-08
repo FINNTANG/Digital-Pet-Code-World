@@ -297,7 +297,7 @@ const OpeningSequence = ({ onStartGame }) => {
       <FontLoader />
       <MatrixRain />
 
-      <div className="relative z-10 flex flex-col items-center justify-center gap-8 px-4">
+      <div className="relative z-10 flex flex-col items-center justify-center gap-8 px-4 w-full max-w-screen-xl mx-auto">
         {/* Title Phase */}
         {phase === 'title' && (
           <div
@@ -339,11 +339,15 @@ const OpeningSequence = ({ onStartGame }) => {
 
         {(showInput || fadeOutPrompt) && phase === 'select' && (
           <div
-            className="flex flex-row md:flex-row flex-col items-center justify-center gap-8 md:gap-16"
+            className="flex flex-row md:flex-row flex-col items-center justify-center gap-8 md:gap-16 pet-selection-container"
             style={{
               opacity: fadeOutPrompt ? 0 : 1,
               transform: fadeOutPrompt ? 'translateY(20px) scale(0.98)' : 'translateY(0) scale(1)',
               transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+              width: '100%',
+              maxWidth: '100vw',
+              padding: '0 10px',
+              boxSizing: 'border-box'
             }}
           >
             {pets.map((pet, index) => (
@@ -367,10 +371,8 @@ const OpeningSequence = ({ onStartGame }) => {
               >
                 {/* 电子宠物机外壳 - 半透明青色冰晶风格 */}
                 <div
-                  className="pet-machine-mobile"
+                  className="pet-machine-mobile pet-machine-select"
                   style={{
-                    width: '280px',
-                    height: '360px',
                     // 调整为更深邃、不透明度更高的青色渐变，贴合黑客帝国风格
                     background: `
                       linear-gradient(135deg, 
@@ -652,9 +654,13 @@ const OpeningSequence = ({ onStartGame }) => {
         {/* Naming Phase */}
         {phase === 'naming' && selectedPet && (
           <div
-            className="flex flex-col items-center gap-10"
+            className="flex flex-col items-center gap-10 naming-phase-container"
             style={{
               animation: 'smoothFadeIn 0.8s ease-out forwards',
+              width: '100%',
+              maxWidth: '100vw',
+              padding: '0 10px',
+              boxSizing: 'border-box'
             }}
           >
             {/* Title */}
@@ -671,10 +677,8 @@ const OpeningSequence = ({ onStartGame }) => {
 
             {/* Selected Pet Display - 电子宠物机样式 */}
             <div
-              className="pet-machine-mobile"
+              className="pet-machine-mobile pet-machine-naming"
               style={{
-                width: '280px',
-                height: '360px',
                 background: `
                   linear-gradient(135deg, 
                     rgba(0, 20, 20, 0.9) 0%, 
@@ -877,7 +881,7 @@ const OpeningSequence = ({ onStartGame }) => {
               </div>
 
               {/* 控制区装饰 */}
-              <div style={{
+              <div className="control-deco" style={{
                 position: 'absolute',
                 bottom: '70px',
                 left: '30px',
@@ -897,6 +901,7 @@ const OpeningSequence = ({ onStartGame }) => {
 
               {/* 主按键 - 绿色 */}
               <div
+                className="main-button"
                 style={{
                   position: 'absolute',
                   bottom: '30px',
@@ -1065,9 +1070,13 @@ const OpeningSequence = ({ onStartGame }) => {
         {/* Ready Phase */}
         {phase === 'ready' && !isTransitioning && showReady && (
           <div
-            className="flex flex-col items-center gap-10"
+            className="flex flex-col items-center gap-10 ready-phase-container"
             style={{
               animation: 'smoothFadeIn 0.8s ease-out forwards',
+              width: '100%',
+              maxWidth: '100vw',
+              padding: '0 10px',
+              boxSizing: 'border-box'
             }}
           >
             <PixelStyleText
@@ -1083,10 +1092,8 @@ const OpeningSequence = ({ onStartGame }) => {
 
             {/* Final Pet Display - 电子宠物机样式 */}
             <div
-              className="pet-machine-mobile"
+              className="pet-machine-mobile pet-machine-ready"
               style={{
-                width: '300px',
-                height: '380px',
                 background: `
                   linear-gradient(135deg, 
                     rgba(0, 20, 20, 0.9) 0%, 
@@ -1136,6 +1143,7 @@ const OpeningSequence = ({ onStartGame }) => {
 
               {/* 品牌标识 */}
               <div
+                className="brand-label"
                 style={{
                   position: 'absolute',
                   top: '45px',
@@ -1168,6 +1176,7 @@ const OpeningSequence = ({ onStartGame }) => {
 
               {/* LCD屏幕 */}
               <div
+                className="pet-screen"
                 style={{
                   position: 'absolute',
                   top: '85px',
@@ -1199,7 +1208,7 @@ const OpeningSequence = ({ onStartGame }) => {
                 }} />
 
                 {/* 屏幕玻璃层 */}
-                <div style={{
+                <div className="pet-screen-inner" style={{
                   width: '140px',
                   height: '140px',
                   background: '#8bac95',
@@ -1242,21 +1251,22 @@ const OpeningSequence = ({ onStartGame }) => {
 
                   {/* 宠物名字 */}
                   <div
+                    className="pet-name-display"
                     style={{
                       position: 'absolute',
-                      top: '15px',
+                      top: '6px',
                       left: '50%',
                       transform: 'translateX(-50%)',
-                      fontSize: '22px',
+                      fontSize: '20px',
                       color: '#1a1a1a',
                       letterSpacing: '1px',
                       fontWeight: '900',
-                      zIndex: 1,
-                      maxWidth: '200px',
+                      zIndex: 4,
+                      maxWidth: '120px',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
-                      padding: '0 10px',
+                      padding: '0 5px',
                       textAlign: 'center',
                       fontFamily: "'VT323', monospace"
                     }}
@@ -1268,7 +1278,7 @@ const OpeningSequence = ({ onStartGame }) => {
                   <div
                     style={{
                       position: 'absolute',
-                      top: '58%',
+                      top: '62%',
                       left: '50%',
                       transform: 'translate(-50%, -50%)',
                       zIndex: 1,
@@ -1292,7 +1302,7 @@ const OpeningSequence = ({ onStartGame }) => {
               </div>
 
               {/* 控制区装饰 */}
-              <div style={{
+              <div className="control-deco" style={{
                 position: 'absolute',
                 bottom: '75px',
                 left: '35px',
@@ -1312,6 +1322,7 @@ const OpeningSequence = ({ onStartGame }) => {
 
               {/* 主按键 - 绿色激活态 */}
               <div
+                className="main-button"
                 style={{
                   position: 'absolute',
                   bottom: '35px',
@@ -1386,6 +1397,17 @@ const OpeningSequence = ({ onStartGame }) => {
       </div>
 
       <style jsx global>{`
+        /* 电子宠物机默认尺寸（桌面端） */
+        .pet-machine-mobile {
+          width: 280px;
+          height: 360px;
+        }
+        
+        .pet-machine-ready {
+          width: 300px;
+          height: 380px;
+        }
+        
         @keyframes smoothFadeIn {
           from {
             opacity: 0;
@@ -1562,178 +1584,36 @@ const OpeningSequence = ({ onStartGame }) => {
         
         /* 移动端适配 */
         @media (max-width: 768px) {
+          /* 确保页面不会横向滚动 */
+          body, html {
+            overflow-x: hidden;
+            max-width: 100vw;
+          }
+          
+          /* 平滑滚动 */
+          * {
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+          }
+          
+          /* 主容器适配 */
+          .relative.z-10.flex {
+            max-width: 100vw;
+            padding: 10px 5px !important;
+          }
+          
           /* 调整打字机效果文字大小 */
           .typewriter .typing-text {
-            font-size: 36px !important;
-          }
-          
-          .typing-cursor {
-            height: 36px !important;
-            width: 6px !important;
-            margin-top: -12px !important;
-          }
-          
-          /* 调整输入框 */
-          input[type="text"] {
-            font-size: 18px !important;
-            padding: 12px 16px !important;
-            min-width: 90vw !important;
-            max-width: 90vw !important;
-          }
-          
-          .pixel-cursor {
-            height: 24px !important;
-            width: 3px !important;
-          }
-          
-          /* 调整按钮 */
-          button {
-            font-size: 16px !important;
-            padding: 12px 28px !important;
-          }
-          
-          /* 调整容器内边距 */
-          .relative.z-10.flex {
-            padding: 15px 10px !important;
-          }
-
-          /* 选择页面的提示文字 - 修复"Choose your virtual companion" */
-          .text-2xl {
-            font-size: 16px !important;
-            margin-bottom: 10px !important;
-            line-height: 1.4 !important;
-            padding: 0 10px !important;
-          }
-          
-          .text-2xl .pixel-text {
-            font-size: 24px !important;
-            letter-spacing: 2px !important;
-            white-space: normal !important;
-            word-break: break-word !important;
-            text-align: center !important;
-          }
-
-          /* 电子宠物机缩小并适配 */
-          .pet-machine-mobile {
-            width: 200px !important;
-            height: 260px !important;
-            margin: 10px 0 !important;
-          }
-
-          .pet-machine-mobile .brand-label {
-            width: 130px !important;
-            height: 20px !important;
-            top: 32px !important;
-          }
-
-          .pet-machine-mobile .brand-label > div {
-            font-size: 10px !important;
-          }
-
-          .pet-machine-mobile .pet-screen {
-            width: 160px !important;
-            height: 130px !important;
-            top: 60px !important;
-          }
-
-          .pet-machine-mobile .pet-screen-inner {
-            width: 100px !important;
-            height: 100px !important;
-          }
-
-          .pet-machine-mobile .pet-screen-inner > div:first-child {
-            background-size: 2px 2px !important;
-          }
-
-          .pet-machine-mobile .pet-gif, 
-          .pet-machine-mobile img {
-            width: 65px !important;
-            height: 65px !important;
-          }
-
-          .pet-machine-mobile .main-button {
-            width: 35px !important;
-            height: 35px !important;
-            bottom: 20px !important;
-            right: 20px !important;
-          }
-
-          .pet-machine-mobile .main-button > div {
-            width: 35px !important;
-            height: 35px !important;
-          }
-
-          .pet-machine-mobile .control-deco {
-            bottom: 50px !important;
-            left: 20px !important;
-          }
-
-          .pet-machine-mobile .control-deco > div {
-            width: 3px !important;
-            height: 10px !important;
-          }
-
-          /* 选择提示 */
-          .select-hint {
-            bottom: -30px !important;
-            font-size: 12px !important;
-          }
-
-          /* Naming阶段样式 */
-          .pixel-input-wrapper {
-            width: 90vw !important;
-          }
-          
-          /* 命名阶段所有文字 */
-          .flex.flex-col.items-center.gap-6 .pixel-text {
-            font-size: 20px !important;
-            letter-spacing: 1.5px !important;
-          }
-          
-          /* "You selected: FOX" 文字 */
-          div[style*="fontSize: '38px'"] {
-            font-size: 24px !important;
-          }
-          
-          /* "Enter a name" 文字 */
-          div[style*="fontSize: '32px'"] {
-            font-size: 20px !important;
-          }
-          
-          /* "Welcome" 文字 */
-          div[style*="fontSize: '50px'"] {
             font-size: 32px !important;
           }
           
-          /* START 按钮 */
-          .px-20.py-4.text-4xl {
-            font-size: 24px !important;
-            padding: 12px 40px !important;
-          }
-
-          /* Ready阶段特殊调整 */
-          .pet-machine-mobile:last-of-type {
-            margin-bottom: 20px !important;
-          }
-          
-          /* 宠物机容器在选择页面横向排列时的调整 */
-          .flex-row.flex-col {
-            flex-direction: column !important;
-            gap: 15px !important;
-          }
-        }
-        
-        @media (max-width: 480px) {
-          .typewriter .typing-text {
-            font-size: 28px !important;
-          }
-          
           .typing-cursor {
-            height: 28px !important;
+            height: 32px !important;
             width: 5px !important;
             margin-top: -10px !important;
           }
           
+          /* 调整输入框 */
           input[type="text"] {
             font-size: 16px !important;
             padding: 10px 12px !important;
@@ -1743,97 +1623,453 @@ const OpeningSequence = ({ onStartGame }) => {
           
           .pixel-cursor {
             height: 20px !important;
+            width: 2px !important;
           }
           
+          /* 调整按钮 */
           button {
             font-size: 14px !important;
-            padding: 10px 20px !important;
+            padding: 10px 24px !important;
+          }
+          
+          /* 调整容器内边距和间距 */
+          .relative.z-10.flex {
+            padding: 10px 8px !important;
+          }
+          
+          /* 选择、命名和Ready阶段特殊容器 */
+          .pet-selection-container,
+          .naming-phase-container,
+          .ready-phase-container {
+            padding: 5px 8px !important;
+            overflow-y: auto !important;
+            max-height: 90vh !important;
+          }
+          
+          /* 选择页面特殊优化 */
+          .pet-selection-container {
+            overflow-x: hidden !important;
+          }
+          
+          /* 调整所有flex容器的间距 */
+          .flex.flex-col.items-center.gap-10 {
+            gap: 15px !important;
+          }
+          
+          .flex.flex-col.items-center.gap-8 {
+            gap: 12px !important;
+          }
+          
+          .flex.flex-col.items-center.gap-6 {
+            gap: 10px !important;
           }
 
-          /* 提示文字进一步缩小 */
+          /* 选择页面的提示文字 - 修复"Choose your virtual companion" */
           .text-2xl {
             font-size: 14px !important;
+            margin-bottom: 8px !important;
+            margin-top: 5px !important;
+            line-height: 1.3 !important;
+            padding: 0 8px !important;
           }
           
           .text-2xl .pixel-text {
-            font-size: 18px !important;
+            font-size: 20px !important;
+            letter-spacing: 1.5px !important;
+            white-space: normal !important;
+            word-break: break-word !important;
+            text-align: center !important;
+          }
+
+          /* 电子宠物机缩小并适配 - 更小的尺寸 */
+          .pet-machine-mobile,
+          .pet-machine-ready {
+            width: 170px !important;
+            height: 220px !important;
+            margin: 5px 0 !important;
+            border-radius: 45px 45px 30px 30px !important;
+          }
+
+          .pet-machine-mobile .brand-label {
+            width: 110px !important;
+            height: 16px !important;
+            top: 25px !important;
+            border-radius: 8px !important;
+          }
+
+          .pet-machine-mobile .brand-label > div {
+            font-size: 8px !important;
+            letter-spacing: 1.5px !important;
+          }
+
+          .pet-machine-mobile .pet-screen {
+            width: 135px !important;
+            height: 105px !important;
+            top: 50px !important;
+            padding: 10px !important;
+            border-radius: 20px 20px 35px 20px !important;
+          }
+
+          .pet-machine-mobile .pet-screen-inner {
+            width: 85px !important;
+            height: 85px !important;
+          }
+
+          .pet-machine-mobile .pet-screen-inner > div:first-child {
+            background-size: 2px 2px !important;
+          }
+          
+          /* 宠物类型标签文字 */
+          .pet-machine-mobile .pet-screen-inner > div[style*="position: absolute"][style*="top: '8px'"],
+          .pet-machine-mobile .pet-screen-inner > div[style*="top: '15px'"] {
+            font-size: 13px !important;
+            top: 5px !important;
+          }
+          
+          /* 宠物名字显示 */
+          .pet-machine-mobile .pet-name-display {
+            font-size: 12px !important;
+            top: 4px !important;
+            max-width: 70px !important;
+          }
+
+          .pet-machine-mobile .pet-gif, 
+          .pet-machine-mobile img {
+            width: 55px !important;
+            height: 55px !important;
+          }
+
+          .pet-machine-mobile .main-button {
+            width: 28px !important;
+            height: 28px !important;
+            bottom: 15px !important;
+            right: 15px !important;
+          }
+
+          .pet-machine-mobile .main-button > div {
+            width: 28px !important;
+            height: 28px !important;
+          }
+
+          .pet-machine-mobile .control-deco {
+            bottom: 40px !important;
+            left: 15px !important;
+            gap: 6px !important;
+          }
+
+          .pet-machine-mobile .control-deco > div {
+            width: 3px !important;
+            height: 8px !important;
+          }
+          
+          /* 顶部装饰线条 */
+          .pet-machine-mobile > div[style*="top: '30px'"] {
+            top: 20px !important;
+            left: 15px !important;
+            right: 15px !important;
+          }
+
+          /* 选择提示 */
+          .select-hint {
+            bottom: -25px !important;
+            font-size: 10px !important;
+          }
+
+          /* Naming阶段样式 */
+          .pixel-input-wrapper {
+            width: 85vw !important;
+          }
+          
+          /* 命名阶段所有文字 */
+          .flex.flex-col.items-center.gap-6 .pixel-text {
+            font-size: 16px !important;
             letter-spacing: 1px !important;
           }
           
-          /* "You selected" 文字 */
+          /* "You selected: FOX" 文字 */
           div[style*="fontSize: '38px'"] {
             font-size: 20px !important;
+            letter-spacing: 2px !important;
           }
           
           /* "Enter a name" 文字 */
           div[style*="fontSize: '32px'"] {
-            font-size: 18px !important;
+            font-size: 16px !important;
+            letter-spacing: 1.5px !important;
           }
           
           /* "Welcome" 文字 */
           div[style*="fontSize: '50px'"] {
             font-size: 28px !important;
+            letter-spacing: 2px !important;
           }
           
           /* START 按钮 */
           .px-20.py-4.text-4xl {
             font-size: 20px !important;
-            padding: 10px 30px !important;
+            padding: 10px 35px !important;
+            letter-spacing: 3px !important;
+          }
+          
+          /* CONFIRM 按钮 */
+          .px-12.py-3.text-3xl {
+            font-size: 18px !important;
+            padding: 8px 24px !important;
           }
 
-          /* 更小屏幕进一步缩小 */
-          .pet-machine-mobile {
-            width: 180px !important;
-            height: 235px !important;
-            margin: 8px 0 !important;
+          /* Ready阶段特殊调整 */
+          .pet-machine-mobile:last-of-type {
+            margin-bottom: 15px !important;
+          }
+          
+          /* 宠物机容器在选择页面横向排列时的调整 */
+          .flex-row.flex-col {
+            flex-direction: column !important;
+            gap: 12px !important;
+          }
+          
+          /* mt-4, mt-6 等margin调整 */
+          .mt-4 {
+            margin-top: 8px !important;
+          }
+          
+          .mt-6 {
+            margin-top: 12px !important;
+          }
+          
+          .mt-10 {
+            margin-top: 15px !important;
+          }
+          
+          .mb-10 {
+            margin-bottom: 15px !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          /* 主容器进一步优化 */
+          .relative.z-10.flex {
+            padding: 8px 5px !important;
+            max-height: 100vh !important;
+          }
+          
+          /* 选择、命名和Ready阶段特殊容器 */
+          .pet-selection-container,
+          .naming-phase-container,
+          .ready-phase-container {
+            padding: 3px 5px !important;
+            overflow-y: auto !important;
+            max-height: 85vh !important;
+          }
+          
+          /* 选择页面特殊优化 */
+          .pet-selection-container {
+            overflow-x: hidden !important;
+          }
+          
+          .typewriter .typing-text {
+            font-size: 24px !important;
+          }
+          
+          .typing-cursor {
+            height: 24px !important;
+            width: 4px !important;
+            margin-top: -8px !important;
+          }
+          
+          input[type="text"] {
+            font-size: 14px !important;
+            padding: 8px 10px !important;
+            min-width: 80vw !important;
+            max-width: 80vw !important;
+          }
+          
+          .pixel-cursor {
+            height: 18px !important;
+            width: 2px !important;
+          }
+          
+          button {
+            font-size: 13px !important;
+            padding: 8px 18px !important;
+          }
+          
+          /* 进一步减小容器间距 */
+          .flex.flex-col.items-center.gap-10 {
+            gap: 10px !important;
+          }
+          
+          .flex.flex-col.items-center.gap-8 {
+            gap: 8px !important;
+          }
+          
+          .flex.flex-col.items-center.gap-6 {
+            gap: 8px !important;
+          }
+
+          /* 提示文字进一步缩小 */
+          .text-2xl {
+            font-size: 12px !important;
+            margin-bottom: 5px !important;
+            margin-top: 3px !important;
+          }
+          
+          .text-2xl .pixel-text {
+            font-size: 16px !important;
+            letter-spacing: 1px !important;
+          }
+          
+          /* "You selected" 文字 */
+          div[style*="fontSize: '38px'"] {
+            font-size: 18px !important;
+            letter-spacing: 1.5px !important;
+          }
+          
+          /* "Enter a name" 文字 */
+          div[style*="fontSize: '32px'"] {
+            font-size: 14px !important;
+            letter-spacing: 1px !important;
+          }
+          
+          /* "Welcome" 文字 */
+          div[style*="fontSize: '50px'"] {
+            font-size: 24px !important;
+            letter-spacing: 1.5px !important;
+          }
+          
+          /* START 按钮 */
+          .px-20.py-4.text-4xl {
+            font-size: 18px !important;
+            padding: 8px 28px !important;
+            letter-spacing: 2px !important;
+          }
+          
+          /* CONFIRM 按钮 */
+          .px-12.py-3.text-3xl {
+            font-size: 16px !important;
+            padding: 7px 20px !important;
+          }
+
+          /* 更小屏幕进一步缩小电子宠物机 */
+          .pet-machine-mobile,
+          .pet-machine-ready {
+            width: 155px !important;
+            height: 200px !important;
+            margin: 5px 0 !important;
+            border-radius: 40px 40px 25px 25px !important;
           }
 
           .pet-machine-mobile .brand-label {
-            width: 115px !important;
-            height: 18px !important;
-            top: 28px !important;
+            width: 100px !important;
+            height: 14px !important;
+            top: 22px !important;
+            border-radius: 7px !important;
           }
 
           .pet-machine-mobile .brand-label > div {
-            font-size: 9px !important;
+            font-size: 7px !important;
+            letter-spacing: 1px !important;
           }
 
           .pet-machine-mobile .pet-screen {
-            width: 145px !important;
-            height: 115px !important;
-            top: 53px !important;
+            width: 120px !important;
+            height: 95px !important;
+            top: 45px !important;
+            padding: 8px !important;
+            border-radius: 18px 18px 30px 18px !important;
           }
 
           .pet-machine-mobile .pet-screen-inner {
-            width: 90px !important;
-            height: 90px !important;
+            width: 75px !important;
+            height: 75px !important;
+          }
+          
+          /* 宠物类型标签文字 */
+          .pet-machine-mobile .pet-screen-inner > div[style*="position: absolute"][style*="top: '8px'"],
+          .pet-machine-mobile .pet-screen-inner > div[style*="top: '15px'"] {
+            font-size: 11px !important;
+            top: 4px !important;
+          }
+          
+          /* 宠物名字显示 */
+          .pet-machine-mobile .pet-name-display {
+            font-size: 10px !important;
+            top: 3px !important;
+            max-width: 60px !important;
+            letter-spacing: 0.5px !important;
           }
 
           .pet-machine-mobile .pet-gif,
           .pet-machine-mobile img {
-            width: 58px !important;
-            height: 58px !important;
+            width: 48px !important;
+            height: 48px !important;
           }
 
           .pet-machine-mobile .main-button {
-            width: 32px !important;
-            height: 32px !important;
-            bottom: 18px !important;
-            right: 18px !important;
+            width: 25px !important;
+            height: 25px !important;
+            bottom: 13px !important;
+            right: 13px !important;
           }
 
           .pet-machine-mobile .main-button > div {
-            width: 32px !important;
-            height: 32px !important;
+            width: 25px !important;
+            height: 25px !important;
+            box-shadow: 
+              0 3px 0 #004422,
+              0 6px 10px rgba(0,0,0,0.6),
+              inset 1px 1px 4px rgba(255,255,255,0.4) !important;
           }
 
           .pet-machine-mobile .control-deco {
-            bottom: 45px !important;
-            left: 18px !important;
+            bottom: 38px !important;
+            left: 13px !important;
+            gap: 5px !important;
+          }
+          
+          .pet-machine-mobile .control-deco > div {
+            width: 2px !important;
+            height: 7px !important;
+          }
+          
+          /* 顶部装饰线条 */
+          .pet-machine-mobile > div[style*="top: '30px'"],
+          .pet-machine-mobile > div[style*="top: '20px'"] {
+            top: 18px !important;
+            left: 13px !important;
+            right: 13px !important;
           }
 
           .select-hint {
-            font-size: 11px !important;
+            font-size: 9px !important;
+            bottom: -22px !important;
+          }
+          
+          /* 进一步减小margin */
+          .mt-4 {
+            margin-top: 5px !important;
+          }
+          
+          .mt-6 {
+            margin-top: 8px !important;
+          }
+          
+          .mt-10 {
+            margin-top: 10px !important;
+          }
+          
+          .mb-10 {
+            margin-bottom: 10px !important;
+          }
+          
+          /* 宠物机容器间距 */
+          .flex-row.flex-col {
+            gap: 10px !important;
+          }
+          
+          /* Ready阶段宠物机 */
+          .pet-machine-mobile:last-of-type {
+            margin-bottom: 10px !important;
           }
         }
       `}</style>
